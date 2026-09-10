@@ -1,0 +1,7 @@
+theme: minima
+title: Instride
+description: Platform pemantauan wellbeing mahasiswa berbasis AI dan analitik privasi.
+lang: id
+
+header_pages:
+  - index.md
