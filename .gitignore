@@ -35,3 +35,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 TODO.md
+Laporan_Mingguan.md
+Laporan_Mingguan.pdf
+generate_dashboard.mjs
