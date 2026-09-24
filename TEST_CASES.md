@@ -1,7 +1,6 @@
 # Instride Test Cases
 
-Dokumen ini berisi test case untuk pengujian fitur Authentication
-dan Role-Based Access pada aplikasi Instride.
+Dokumen ini berisi test case untuk pengujian fitur Authentication, Role-Based Access, Mood Tracker, dan Journal pada aplikasi Instride.
 
 Status pengujian:
 
@@ -20,30 +19,69 @@ Status pengujian:
 | Test ID | TC-AUTH-001 |
 | Feature | Register |
 | Precondition | User belum memiliki akun |
-| Input | Nama, email valid, password valid |
+| Input | Name valid, email valid, password valid |
 | Expected Result | Akun berhasil dibuat |
 | Status | NOT RUN |
 
 ---
 
-## TC-AUTH-002 — Register dengan field kosong
+## TC-AUTH-002 — Register dengan name kosong
 
 | Field | Value |
 |---|---|
 | Test ID | TC-AUTH-002 |
-| Feature | Register |
+| Feature | Register Validation |
 | Precondition | User berada pada halaman Register |
-| Input | Salah satu atau beberapa field kosong |
-| Expected Result | Sistem menampilkan pesan validasi dan registrasi tidak dilakukan |
+| Input | Name kosong, email valid, password valid |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `name` |
 | Status | NOT RUN |
 
 ---
 
-## TC-AUTH-003 — Login dengan credentials valid
+## TC-AUTH-003 — Register dengan email kosong
 
 | Field | Value |
 |---|---|
 | Test ID | TC-AUTH-003 |
+| Feature | Register Validation |
+| Precondition | User berada pada halaman Register |
+| Input | Name valid, email kosong, password valid |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-004 — Register dengan format email tidak valid
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-004 |
+| Feature | Register Validation |
+| Precondition | User berada pada halaman Register |
+| Input | Name valid, email dengan format tidak valid, password valid |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-005 — Register dengan password kosong
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-005 |
+| Feature | Register Validation |
+| Precondition | User berada pada halaman Register |
+| Input | Name valid, email valid, password kosong |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `password` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-006 — Login dengan credentials valid
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-006 |
 | Feature | Login |
 | Precondition | User telah memiliki akun |
 | Input | Email dan password yang benar |
@@ -52,12 +90,51 @@ Status pengujian:
 
 ---
 
-## TC-AUTH-004 — Login dengan password salah
+## TC-AUTH-007 — Login dengan email kosong
 
 | Field | Value |
 |---|---|
-| Test ID | TC-AUTH-004 |
-| Feature | Login |
+| Test ID | TC-AUTH-007 |
+| Feature | Login Validation |
+| Precondition | User berada pada halaman Login |
+| Input | Email kosong, password valid |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-008 — Login dengan format email tidak valid
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-008 |
+| Feature | Login Validation |
+| Precondition | User berada pada halaman Login |
+| Input | Email dengan format tidak valid, password valid |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-009 — Login dengan password kosong
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-009 |
+| Feature | Login Validation |
+| Precondition | User berada pada halaman Login |
+| Input | Email valid, password kosong |
+| Expected Result | Sistem menolak input dan menampilkan validation error pada field `password` |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-010 — Login dengan password salah
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-010 |
+| Feature | Login Authentication |
 | Precondition | User telah memiliki akun |
 | Input | Email benar, password salah |
 | Expected Result | Login ditolak dan sistem menampilkan pesan error |
@@ -65,12 +142,12 @@ Status pengujian:
 
 ---
 
-## TC-AUTH-005 — Login dengan email yang tidak terdaftar
+## TC-AUTH-011 — Login dengan email yang tidak terdaftar
 
 | Field | Value |
 |---|---|
-| Test ID | TC-AUTH-005 |
-| Feature | Login |
+| Test ID | TC-AUTH-011 |
+| Feature | Login Authentication |
 | Precondition | Email belum terdaftar |
 | Input | Email yang tidak terdaftar dan password |
 | Expected Result | Login ditolak dan sistem menampilkan pesan error |
@@ -127,7 +204,7 @@ Status pengujian:
 | Feature | Role-Based Access |
 | Precondition | User telah login sebagai konselor/admin |
 | Input | User mengakses Campus Dashboard |
-| Expected Result | Akses diberikan |
+| Expected Result | Akses diberikan dan Campus Dashboard ditampilkan |
 | Status | NOT RUN |
 
 ---
@@ -152,10 +229,10 @@ Status pengujian:
 | Field | Value |
 |---|---|
 | Test ID | TC-MOOD-002 |
-| Feature | Mood Tracker |
+| Feature | Mood Validation |
 | Precondition | User telah login |
-| Input | Mood kosong |
-| Expected Result | Sistem menolak input dan menampilkan pesan validasi |
+| Input | Mood kosong/tidak tersedia |
+| Expected Result | Sistem menolak input dan menampilkan validation error |
 | Status | NOT RUN |
 
 ---
@@ -165,10 +242,10 @@ Status pengujian:
 | Field | Value |
 |---|---|
 | Test ID | TC-MOOD-003 |
-| Feature | Mood Tracker |
+| Feature | Mood Validation |
 | Precondition | User telah login |
 | Input | Mood < 1 atau > 5 |
-| Expected Result | Sistem menolak input |
+| Expected Result | Sistem menolak input dan menampilkan validation error |
 | Status | NOT RUN |
 
 ---
@@ -182,7 +259,7 @@ Status pengujian:
 | Test ID | TC-JOURNAL-001 |
 | Feature | Journal |
 | Precondition | User telah login |
-| Input | Isi jurnal valid |
+| Input | Isi jurnal yang valid dan tidak melebihi batas karakter |
 | Expected Result | Jurnal berhasil disimpan |
 | Status | NOT RUN |
 
@@ -193,10 +270,10 @@ Status pengujian:
 | Field | Value |
 |---|---|
 | Test ID | TC-JOURNAL-002 |
-| Feature | Journal |
+| Feature | Journal Validation |
 | Precondition | User telah login |
-| Input | Isi jurnal kosong |
-| Expected Result | Sistem menolak input dan menampilkan pesan validasi |
+| Input | Isi jurnal kosong/tidak tersedia |
+| Expected Result | Sistem menolak input dan menampilkan validation error |
 | Status | NOT RUN |
 
 ---
@@ -206,10 +283,10 @@ Status pengujian:
 | Field | Value |
 |---|---|
 | Test ID | TC-JOURNAL-003 |
-| Feature | Journal |
+| Feature | Journal Validation |
 | Precondition | User telah login |
 | Input | Isi jurnal melebihi batas karakter yang ditentukan sistem |
-| Expected Result | Sistem menolak input dan menampilkan pesan validasi |
+| Expected Result | Sistem menolak input dan menampilkan validation error |
 | Status | NOT RUN |
 
 ---
@@ -223,6 +300,12 @@ Status pengujian:
 | TC-AUTH-003 | NOT RUN | - | - |
 | TC-AUTH-004 | NOT RUN | - | - |
 | TC-AUTH-005 | NOT RUN | - | - |
+| TC-AUTH-006 | NOT RUN | - | - |
+| TC-AUTH-007 | NOT RUN | - | - |
+| TC-AUTH-008 | NOT RUN | - | - |
+| TC-AUTH-009 | NOT RUN | - | - |
+| TC-AUTH-010 | NOT RUN | - | - |
+| TC-AUTH-011 | NOT RUN | - | - |
 | TC-RBAC-001 | NOT RUN | - | - |
 | TC-RBAC-002 | NOT RUN | - | - |
 | TC-RBAC-003 | NOT RUN | - | - |
