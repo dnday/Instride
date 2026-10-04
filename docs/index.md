@@ -4,6 +4,8 @@
 
 **Project Senior Project TI**
 
+**Aplikasi:** [Buka Instride](app/) · [Campus Dashboard](app/campus-dashboard)
+
 **Instansi:** Departemen Teknologi Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada
 
 Instride adalah aplikasi web untuk membantu mahasiswa memantau wellbeing secara personal sekaligus membantu institusi memahami tren kesejahteraan mahasiswa secara agregat dan berorientasi pada privasi.
