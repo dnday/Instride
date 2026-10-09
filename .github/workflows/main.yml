@@ -1,35 +1,94 @@
-name: CI - Build & Lint Instride
+name: CI/CD - Instride
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Satu deploy Pages dalam satu waktu; deploy yang sedang jalan tidak dibatalkan
+concurrency:
+  group: pages
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x]
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: npm
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run Lint
-      run: npm run lint
-      
-    - name: Build project
-      run: npm run build
-      env:
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Build app
+        run: npm run build
+        env:
+          BASE_PATH: /Instride/app
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      # Halaman kelompok (docs/) tetap di root Pages, app di /app
+      - name: Build docs page
+        if: github.event_name != 'pull_request'
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./docs
+          destination: ./_site
+
+      - name: Gabungkan docs + app
+        if: github.event_name != 'pull_request'
+        run: sudo cp -r out _site/app
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: ./_site
+
+  migrate:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        with:
+          version: latest
+
+      # Dilewati sampai secret Supabase diisi
+      - name: Push migrations
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        run: |
+          supabase link --project-ref "$SUPABASE_PROJECT_REF"
+          supabase db push
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: [build, migrate]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}app/
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

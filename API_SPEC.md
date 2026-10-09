@@ -1,224 +1,248 @@
-# Instride Validation Rules
+# Instride API Specification
 
-Dokumen ini mendefinisikan aturan validasi input pada aplikasi Instride. Validasi digunakan untuk memastikan data yang diberikan pengguna memenuhi persyaratan sebelum diproses oleh sistem.
-
-Validasi diterapkan pada sisi frontend dan backend.
+Dokumen ini mendefinisikan rancangan endpoint API untuk aplikasi Instride berdasarkan functional requirements dan pembagian tugas pengembangan.
 
 ---
 
-# 1. General Validation Rules
+## 1. Authentication
 
-- Validasi dilakukan sebelum input diproses lebih lanjut.
-- Input yang tidak memenuhi aturan validasi harus ditolak.
-- Validation error harus memberikan informasi mengenai field yang bermasalah.
-- Validation hanya memeriksa kelengkapan dan format/nilai input.
-- Validation tidak menentukan apakah credentials pengguna benar.
-- Authentication bertanggung jawab untuk memeriksa credentials pengguna.
-- Validation tidak menggantikan authentication maupun authorization.
+Authentication digunakan untuk menangani proses registrasi dan login pengguna.
 
----
+Role yang digunakan dalam sistem:
+- `mahasiswa`
+- `konselor`
 
-# 2. Authentication Input Validation
+Implementasi authentication direncanakan menggunakan Supabase Auth.
 
-## 2.1 Register
+### 1.1 Register
 
-### Fields
+**Endpoint**
 
-| Field | Required | Validation |
-|---|---|---|
-| `name` | Yes | Tidak boleh kosong |
-| `email` | Yes | Tidak boleh kosong dan harus memiliki format email yang valid |
-| `password` | Yes | Tidak boleh kosong |
+`POST /api/auth/register`
 
-### Rules
+**Description**
 
-- `name` wajib diisi.
-- `name` tidak boleh kosong.
-- `email` wajib diisi.
-- `email` tidak boleh kosong.
-- `email` harus memiliki format email yang valid.
-- `password` wajib diisi.
-- `password` tidak boleh kosong.
-- Sistem harus menolak input apabila salah satu field wajib tidak tersedia atau kosong.
+Mendaftarkan pengguna baru ke dalam sistem.
 
-### Valid Example
+**Request Body**
 
+```json
 {
   "name": "Nama Mahasiswa",
   "email": "mahasiswa@example.com",
   "password": "password123"
 }
+```
 
-### Invalid Example — Field Kosong
-
-{
-  "name": "",
-  "email": "mahasiswa@example.com",
-  "password": "password123"
-}
-
-Expected result: sistem menampilkan validation error dan proses registrasi tidak dilakukan.
-
-> Aturan ini sesuai dengan test case `TC-AUTH-002`, yang menguji register dengan salah satu atau beberapa field kosong. :contentReference[oaicite:0]{index=0}
-
----
-
-## 2.2 Login
-
-### Fields
-
-| Field | Required | Validation |
-|---|---|---|
-| `email` | Yes | Tidak boleh kosong dan harus memiliki format email yang valid |
-| `password` | Yes | Tidak boleh kosong |
-
-### Rules
-
+**Validation**
+- `name` wajib diisi.
 - `email` wajib diisi.
-- `email` tidak boleh kosong.
 - `email` harus memiliki format email yang valid.
 - `password` wajib diisi.
-- `password` tidak boleh kosong.
-- Sistem harus menolak input apabila salah satu field wajib tidak tersedia atau kosong.
-- Validasi input dilakukan sebelum proses authentication.
 
-### Valid Example
+---
 
+### 1.2 Login
+
+**Endpoint**
+
+`POST /api/auth/login`
+
+**Description**
+
+Melakukan login pengguna ke dalam sistem.
+
+**Request Body**
+
+```json
 {
   "email": "mahasiswa@example.com",
   "password": "password123"
 }
+```
 
-### Invalid Example — Email Kosong
-
-{
-  "email": "",
-  "password": "password123"
-}
-
-Expected result: sistem menampilkan validation error.
-
-> Password yang salah atau email yang tidak terdaftar bukan validation rule. Kedua kondisi tersebut merupakan hasil dari proses authentication dan sudah diuji secara terpisah melalui `TC-AUTH-004` dan `TC-AUTH-005`. :contentReference[oaicite:1]{index=1}
+**Validation**
+- `email` wajib diisi.
+- `email` harus memiliki format email yang valid.
+- `password` wajib diisi.
 
 ---
 
-# 3. Mood Tracker Validation
+## 2. Mood Tracker
 
-## 3.1 Create Mood
+Mood Tracker digunakan untuk mencatat mood mahasiswa.
 
-### Fields
+### 2.1 Create Mood
 
-| Field | Required | Validation |
-|---|---|---|
-| `mood` | Yes | Nilai harus berada pada skala 1–5 |
+**Endpoint**
 
-### Rules
+`POST /api/moods`
 
-- `mood` wajib diisi.
-- `mood` harus memiliki nilai pada rentang 1 sampai 5.
-- Sistem harus menolak input apabila `mood` tidak tersedia.
-- Sistem harus menolak input apabila nilai `mood` berada di luar rentang 1–5.
+**Description**
 
-### Valid Example
+Menyimpan data mood mahasiswa.
 
+**Request Body**
+
+```json
 {
   "mood": 4
 }
+```
 
-### Invalid Example — Mood Kosong
-
-{}
-
-Expected result: sistem menolak input dan menampilkan pesan validasi.
-
-### Invalid Example — Di Luar Rentang
-
-{
-  "mood": 6
-}
-
-Expected result: sistem menolak input.
-
-> Aturan mood 1–5 dan kondisi mood kosong/di luar rentang tercermin dalam `TC-MOOD-001` sampai `TC-MOOD-003`. :contentReference[oaicite:2]{index=2}
+**Validation**
+- `mood` wajib diisi.
+- Nilai `mood` harus berada pada rentang `1–5`.
 
 ---
 
-# 4. Journal Validation
+### 2.2 Get Mood
 
-## 4.1 Create Journal
+**Endpoint**
 
-### Fields
+`GET /api/moods`
 
-| Field | Required | Validation |
-|---|---|---|
-| `content` | Yes | Tidak boleh kosong dan tidak boleh melebihi batas karakter sistem |
+**Description**
 
-### Rules
+Mengambil data mood mahasiswa.
 
-- `content` wajib diisi.
-- `content` tidak boleh kosong.
-- `content` tidak boleh melebihi batas karakter yang ditentukan sistem.
-- Sistem harus menolak input apabila `content` tidak tersedia atau kosong.
-- Sistem harus menolak input apabila `content` melebihi batas karakter yang ditentukan sistem.
+---
 
-### Valid Example
+## 3. Journal
 
+Journal digunakan untuk menyimpan catatan harian mahasiswa.
+
+### 3.1 Create Journal
+
+**Endpoint**
+
+`POST /api/journals`
+
+**Description**
+
+Menyimpan journal mahasiswa.
+
+**Request Body**
+
+```json
 {
   "content": "Hari ini saya merasa cukup baik."
 }
+```
 
-### Invalid Example — Content Kosong
-
-{
-  "content": ""
-}
-
-Expected result: sistem menolak input dan menampilkan pesan validasi.
-
-### Invalid Example — Melebihi Batas Karakter
-
-{
-  "content": "Isi jurnal yang melebihi batas karakter yang ditentukan sistem..."
-}
-
-Expected result: sistem menolak input dan menampilkan pesan validasi.
-
-> `TEST_CASES.md` menetapkan bahwa journal memiliki batas karakter, tetapi nilai maksimum karakter spesifik belum dicantumkan. Karena itu, dokumen ini tidak menetapkan angka baru. :contentReference[oaicite:3]{index=3}
+**Validation**
+- `content` wajib diisi.
+- `content` tidak boleh kosong.
+- `content` tidak boleh melebihi batas karakter yang telah ditentukan.
 
 ---
 
-# 5. Validation Error Response
+### 3.2 Get Journal
 
-Apabila input tidak memenuhi aturan validasi, sistem harus memberikan response yang menunjukkan field yang bermasalah.
+**Endpoint**
 
-### Example
+`GET /api/journals`
 
-{
-  "valid": false,
-  "errors": {
-    "email": "Format email tidak valid"
-  }
-}
+**Description**
 
-### Multiple Validation Errors
-
-{
-  "valid": false,
-  "errors": {
-    "name": "Field name wajib diisi",
-    "email": "Format email tidak valid",
-    "password": "Field password wajib diisi"
-  }
-}
+Mengambil data journal mahasiswa.
 
 ---
 
-# 6. Implementation Notes
+## 4. Dashboard
 
-- Validation harus diterapkan pada frontend dan backend.
-- Validation logic harus mengikuti aturan yang didefinisikan dalam dokumen ini.
-- Validation tidak mencakup pemeriksaan credentials pengguna.
-- Validation tidak mencakup pemeriksaan role atau hak akses pengguna.
-- Authentication dan Role-Based Access diuji melalui `TEST_CASES.md` dan memiliki flow masing-masing.
-- Test case dan hasil pengujian tidak didefinisikan ulang dalam dokumen ini.
-- Batas maksimum karakter journal harus mengikuti nilai yang ditentukan pada implementasi/requirement sistem.
+Dashboard digunakan untuk menampilkan data wellbeing berdasarkan kebutuhan pengguna.
+
+### 4.1 Personal Dashboard
+
+Personal Dashboard digunakan oleh mahasiswa untuk melihat data wellbeing pribadi.
+
+**Access Role**
+
+`mahasiswa`
+
+Data yang digunakan berasal dari data mood dan journal mahasiswa.
+
+---
+
+### 4.2 Campus Dashboard
+
+Campus Dashboard digunakan oleh konselor untuk melihat data wellbeing mahasiswa dalam bentuk agregat.
+
+**Access Role**
+
+`konselor`
+
+Mahasiswa tidak diperbolehkan mengakses Campus Dashboard.
+
+---
+
+## 5. Authentication and Authorization
+
+### 5.1 Authentication
+
+Authentication digunakan untuk memastikan pengguna dapat melakukan register dan login ke dalam sistem.
+
+Setelah login berhasil, sistem melakukan pengecekan role pengguna.
+
+Role yang digunakan:
+- `mahasiswa`
+- `konselor`
+
+---
+
+### 5.2 Authorization
+
+Authorization digunakan untuk menentukan akses pengguna berdasarkan role.
+
+Aturan akses:
+
+| Role | Personal Dashboard | Campus Dashboard |
+|---|---|---|
+| `mahasiswa` | Diizinkan | Ditolak |
+| `konselor` | - | Diizinkan |
+
+---
+
+## 6. Validation
+
+Validation API mengikuti aturan yang didefinisikan pada `VALIDATION_RULES.md`.
+
+Validation mencakup:
+- Register
+- Login
+- Mood Tracker
+- Journal
+
+Input yang tidak memenuhi validation rules harus ditolak oleh sistem.
+
+---
+
+## 7. Authentication Requirement
+
+Endpoint yang membutuhkan pengguna terautentikasi hanya dapat digunakan setelah pengguna berhasil login.
+
+Data mood dan journal yang bersifat personal harus dikaitkan dengan pengguna yang sedang login.
+
+---
+
+## 8. API Endpoint Summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register pengguna |
+| `POST` | `/api/auth/login` | Login pengguna |
+| `POST` | `/api/moods` | Menyimpan mood |
+| `GET` | `/api/moods` | Mengambil data mood |
+| `POST` | `/api/journals` | Menyimpan journal |
+| `GET` | `/api/journals` | Mengambil data journal |
+
+---
+
+## 9. Implementation Notes
+
+- Authentication direncanakan menggunakan Supabase Auth.
+- Role digunakan untuk membedakan akses `mahasiswa` dan `konselor`.
+- Validation harus mengikuti aturan pada `VALIDATION_RULES.md`.
+- Pengujian endpoint dilakukan berdasarkan test case pada `TEST_CASES.md`.
+- Test case tetap berstatus `NOT RUN` sampai implementasi benar-benar tersedia dan pengujian telah dilakukan.
