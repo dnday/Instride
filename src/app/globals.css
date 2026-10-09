@@ -2,26 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  @apply bg-surface text-ink font-sans;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Fokus keyboard selalu terlihat */
+:focus-visible {
+  @apply outline-none ring-2 ring-brand-700 ring-offset-2 ring-offset-surface;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
