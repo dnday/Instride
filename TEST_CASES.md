@@ -34,7 +34,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Register |
 | Input | Name kosong, email valid, password valid |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `name` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -47,7 +47,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Register |
 | Input | Name valid, email kosong, password valid |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -60,7 +60,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Register |
 | Input | Name valid, email dengan format tidak valid, password valid |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -73,7 +73,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Register |
 | Input | Name valid, email valid, password kosong |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `password` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -99,7 +99,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Login |
 | Input | Email kosong, password valid |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -112,7 +112,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Login |
 | Input | Email dengan format tidak valid, password valid |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `email` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -125,7 +125,7 @@ Status pengujian:
 | Precondition | User berada pada halaman Login |
 | Input | Email valid, password kosong |
 | Expected Result | Sistem menolak input dan menampilkan validation error pada field `password` |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -192,7 +192,7 @@ Status pengujian:
 | Precondition | User telah login sebagai mahasiswa |
 | Input | Mahasiswa mencoba mengakses Campus Dashboard |
 | Expected Result | Akses ditolak |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -205,7 +205,7 @@ Status pengujian:
 | Precondition | User telah login sebagai konselor/admin |
 | Input | User mengakses Campus Dashboard |
 | Expected Result | Akses diberikan dan Campus Dashboard ditampilkan |
-| Status | NOT RUN |
+| Status | PASS |
 
 ---
 
@@ -293,26 +293,28 @@ Status pengujian:
 
 # 5. Test Execution Summary
 
+Terakhir dijalankan: 9 Oktober 2026. Test otomatis dijalankan dengan `npm run test:run` dan juga oleh CI pada setiap push ke `main`.
+
 | Test ID | Status | Actual Result | Notes |
 |---|---|---|---|
-| TC-AUTH-001 | NOT RUN | - | - |
-| TC-AUTH-002 | NOT RUN | - | - |
-| TC-AUTH-003 | NOT RUN | - | - |
-| TC-AUTH-004 | NOT RUN | - | - |
-| TC-AUTH-005 | NOT RUN | - | - |
-| TC-AUTH-006 | NOT RUN | - | - |
-| TC-AUTH-007 | NOT RUN | - | - |
-| TC-AUTH-008 | NOT RUN | - | - |
-| TC-AUTH-009 | NOT RUN | - | - |
-| TC-AUTH-010 | NOT RUN | - | - |
-| TC-AUTH-011 | NOT RUN | - | - |
-| TC-RBAC-001 | NOT RUN | - | - |
-| TC-RBAC-002 | NOT RUN | - | - |
-| TC-RBAC-003 | NOT RUN | - | - |
-| TC-RBAC-004 | NOT RUN | - | - |
-| TC-MOOD-001 | NOT RUN | - | - |
-| TC-MOOD-002 | NOT RUN | - | - |
-| TC-MOOD-003 | NOT RUN | - | - |
-| TC-JOURNAL-001 | NOT RUN | - | - |
-| TC-JOURNAL-002 | NOT RUN | - | - |
-| TC-JOURNAL-003 | NOT RUN | - | - |
+| TC-AUTH-001 | NOT RUN | - | Perlu uji manual ke Supabase (membuat akun nyata) |
+| TC-AUTH-002 | PASS | Ditolak, error pada field `name` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-003 | PASS | Ditolak, error pada field `email` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-004 | PASS | 7 variasi format email tidak valid ditolak, error pada field `email` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-005 | PASS | Ditolak, error pada field `password` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-006 | NOT RUN | - | Perlu uji manual ke Supabase |
+| TC-AUTH-007 | PASS | Ditolak, error pada field `email` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-008 | PASS | Ditolak, error pada field `email` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-009 | PASS | Ditolak, error pada field `password` | Otomatis: `src/lib/authValidation.test.ts` |
+| TC-AUTH-010 | NOT RUN | - | Perlu uji manual ke Supabase |
+| TC-AUTH-011 | NOT RUN | - | Perlu uji manual ke Supabase |
+| TC-RBAC-001 | NOT RUN | - | Perlu uji manual alur login |
+| TC-RBAC-002 | NOT RUN | - | Perlu uji manual alur login dengan akun konselor |
+| TC-RBAC-003 | PASS | Mahasiswa mendapat 0 baris statistik; pengguna anonim ditolak (permission denied) | Otomatis: `tests/database.test.mjs`; diuji di level database (RLS) |
+| TC-RBAC-004 | PASS | Konselor menerima data statistik agregat | Otomatis: `tests/database.test.mjs`; uji UI end-to-end menunggu akun konselor |
+| TC-MOOD-001 | NOT RUN | - | Menunggu form Mood (Issue #9) |
+| TC-MOOD-002 | NOT RUN | - | Menunggu form Mood (Issue #9) |
+| TC-MOOD-003 | NOT RUN | - | Menunggu form Mood (Issue #9) |
+| TC-JOURNAL-001 | NOT RUN | - | Menunggu form Jurnal (Issue #9) |
+| TC-JOURNAL-002 | NOT RUN | - | Menunggu form Jurnal (Issue #9) |
+| TC-JOURNAL-003 | NOT RUN | - | Menunggu form Jurnal (Issue #9) dan batas karakter |
