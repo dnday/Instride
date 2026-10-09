@@ -1,10 +1,6 @@
-
 export type UserRole = "mahasiswa" | "konselor" | "admin";
-
 export type MoodValue = 1 | 2 | 3 | 4 | 5;
-
 export type Sentiment = "Positif" | "Negatif" | "Netral";
-
 export interface UserProfile {
   user_id: string;
   name: string;
