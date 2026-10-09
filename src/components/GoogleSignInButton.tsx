@@ -1,16 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 
 import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 /**
- * Login/daftar dengan akun Google lewat Supabase Auth (OAuth).
+ * Login/daftar dengan akun Google.
+ *
+ * Jika NEXT_PUBLIC_GOOGLE_CLIENT_ID di-set, memakai Google Identity Services (tombol & popup
+ * resmi Google dari domain aplikasi sendiri) lalu menukar ID token ke Supabase lewat
+ * signInWithIdToken, sehingga layar Google tidak menampilkan domain supabase.co.
+ * Jika tidak di-set, memakai redirect OAuth biasa Supabase.
+ *
  * Akun baru otomatis dibuat; profil public.users dibuat trigger on_auth_user_created.
- * Butuh provider Google aktif di Supabase dan URL tujuan terdaftar di Redirect URLs.
  */
+const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+type GoogleId = {
+  initialize(config: {
+    client_id: string;
+    callback: (res: { credential: string }) => void;
+    nonce: string;
+    use_fedcm_for_prompt?: boolean;
+  }): void;
+  renderButton(el: HTMLElement, options: Record<string, unknown>): void;
+};
+declare global {
+  interface Window {
+    google?: { accounts: { id: GoogleId } };
+  }
+}
+
+async function sha256Hex(text: string) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function loadGsi(): Promise<GoogleId> {
+  return new Promise((resolve, reject) => {
+    if (window.google?.accounts?.id) return resolve(window.google.accounts.id);
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.onload = () => (window.google?.accounts?.id ? resolve(window.google.accounts.id) : reject(new Error("GSI")));
+    s.onerror = () => reject(new Error("GSI"));
+    document.head.appendChild(s);
+  });
+}
+
 export default function GoogleSignInButton({ label = "Masuk dengan Google" }: { label?: string }) {
+  return CLIENT_ID ? <GisButton clientId={CLIENT_ID} signup={label.startsWith("Daftar")} /> : <RedirectButton label={label} />;
+}
+
+function GisButton({ clientId, signup }: { clientId: string; signup: boolean }) {
+  const router = useRouter();
+  const box = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const supabase = getSupabaseClient();
+        // Nonce mentah dikirim ke Supabase, hash-nya ke Google; Supabase mencocokkan keduanya
+        const nonce = crypto.randomUUID();
+        const [gsi, hashed] = await Promise.all([loadGsi(), sha256Hex(nonce)]);
+        if (cancelled || !box.current) return;
+        gsi.initialize({
+          client_id: clientId,
+          nonce: hashed,
+          use_fedcm_for_prompt: true,
+          callback: async ({ credential }) => {
+            setError(null);
+            const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
+            if (error) return setError("Gagal masuk dengan Google. Silakan coba lagi.");
+            router.push(AUTHENTICATED_DESTINATION);
+          },
+        });
+        gsi.renderButton(box.current, {
+          type: "standard",
+          theme: "outline",
+          size: "large",
+          shape: "rectangular",
+          text: signup ? "signup_with" : "signin_with",
+          locale: "id",
+          width: box.current.offsetWidth || 320,
+        });
+      } catch (e) {
+        if (!cancelled) setError(e instanceof SupabaseConfigError ? e.message : "Login Google tidak dapat dimuat. Gunakan email dan password.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [clientId, signup, router]);
+
+  return (
+    <div>
+      <div ref={box} className="flex justify-center min-h-[44px]" />
+      {error && (
+        <p className="mt-2 text-xs text-red-600" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function RedirectButton({ label }: { label: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
