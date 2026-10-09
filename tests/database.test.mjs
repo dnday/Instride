@@ -78,9 +78,10 @@ test("mahasiswa tidak bisa menyimpan mood atas nama orang lain", async () => {
   await assert.rejects(as("anon", null, `INSERT INTO moods (user_id, mood_value) VALUES ('${id(2)}', 3)`));
 });
 
-test("statistik kampus hanya untuk konselor", async () => {
-  assert.equal((await as("authenticated", id(1), "SELECT * FROM campus_wellbeing_stats()")).length, 0);
+test("TC-RBAC-003/004 statistik kampus ditolak untuk mahasiswa & anon, diberikan untuk konselor", async () => {
+  assert.equal((await as("authenticated", id(1), "SELECT * FROM campus_wellbeing_stats()")).length, 0); // TC-RBAC-003
   await assert.rejects(as("anon", null, "SELECT * FROM campus_wellbeing_stats()"));
+  assert.ok((await as("authenticated", KONSELOR, "SELECT * FROM campus_wellbeing_stats()")).length > 0); // TC-RBAC-004
 });
 
 test("k-anonymity: minggu dengan < 5 mahasiswa disembunyikan", async () => {
