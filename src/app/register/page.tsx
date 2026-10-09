@@ -7,6 +7,7 @@ import { type FormEvent, useState } from "react";
 import { mapSignUpError } from "@/lib/authErrors";
 import { type FieldErrors, validateRegister } from "@/lib/authValidation";
 import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 export default function RegisterPage() {
@@ -109,6 +110,13 @@ export default function RegisterPage() {
             {formError}
           </div>
         )}
+
+        <GoogleSignInButton label="Daftar dengan Google" />
+        <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
+          <span className="h-px flex-1 bg-gray-200" />
+          atau dengan email
+          <span className="h-px flex-1 bg-gray-200" />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Nama */}
