@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import { useEffect, useState } from "react";
 
 type Stat = {
@@ -24,11 +24,15 @@ export default function CampusDashboard() {
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
-    // Client dibuat di sini (bukan top-level) agar build tidak gagal saat env belum di-set
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!url || !key) return setState({ status: "error", message: "Supabase belum dikonfigurasi." });
-    const supabase = createClient(url, key);
+    let supabase;
+    try {
+      supabase = getSupabaseClient();
+    } catch (e) {
+      if (e instanceof SupabaseConfigError) {
+        return setState({ status: "error", message: e.message });
+      }
+      return setState({ status: "error", message: "Konfigurasi tidak valid." });
+    }
 
     (async () => {
       const { data: auth } = await supabase.auth.getUser();
@@ -136,7 +140,7 @@ function TrendChart({ stats }: { stats: Stat[] }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Grafik tren rata-rata mood mingguan">
-      {[1, 2, 3, 4, 5].map((v) => (
+      { [1, 2, 3, 4, 5].map((v) => (
         <g key={v}>
           <line x1={P} x2={W - P} y1={y(v)} y2={y(v)} stroke="#E5E7EB" />
           <text x={4} y={y(v) + 4} fontSize="10" fill="#6B7280">{v}</text>
