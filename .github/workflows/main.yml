@@ -32,12 +32,17 @@ jobs:
       - name: Run Lint
         run: npm run lint
 
+      # RLS, k-anonymity, trigger signup & agregasi diuji terhadap semua migration
+      - name: Run Tests
+        run: npm run test:run
+
       - name: Build app
         run: npm run build
         env:
           BASE_PATH: /Instride/app
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
 
       # Halaman kelompok (docs/) tetap di root Pages, app di /app
       - name: Build docs page

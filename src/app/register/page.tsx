@@ -4,9 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { mapSignUpError, profileSetupError } from "@/lib/authErrors";
+import { mapSignUpError } from "@/lib/authErrors";
 import { type FieldErrors, validateRegister } from "@/lib/authValidation";
 import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
+import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 export default function RegisterPage() {
@@ -47,9 +48,11 @@ export default function RegisterPage() {
       }
 
       // 3. Sign up
+      // Profil public.users dibuat otomatis oleh trigger on_auth_user_created (Issue #8) dari metadata name
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: { data: { name: name.trim() } },
       });
 
       if (signUpError) {
@@ -61,17 +64,6 @@ export default function RegisterPage() {
       const user = data.user;
       if (!user) {
         setFormError("Registrasi tidak dapat diselesaikan.");
-        return;
-      }
-
-      // 4. Insert profile row (role omitted --> schema default 'mahasiswa')
-      const { error: insertError } = await supabase
-        .from("users")
-        .insert({ user_id: user.id, name: name.trim(), email: email.trim() });
-
-      if (insertError) {
-        const mapped = profileSetupError();
-        setFormError(mapped.message);
         return;
       }
 
@@ -118,6 +110,13 @@ export default function RegisterPage() {
             {formError}
           </div>
         )}
+
+        <GoogleSignInButton label="Daftar dengan Google" />
+        <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
+          <span className="h-px flex-1 bg-gray-200" />
+          atau dengan email
+          <span className="h-px flex-1 bg-gray-200" />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Nama */}
