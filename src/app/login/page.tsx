@@ -6,7 +6,7 @@ import { type FormEvent, useState } from "react";
 
 import { mapSignInError } from "@/lib/authErrors";
 import { type FieldErrors, validateLogin } from "@/lib/authValidation";
-import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
+import { destinationForRole } from "@/lib/constants";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
@@ -57,7 +57,18 @@ export default function LoginPage() {
       }
 
       // 4. Session persisted by the client; navigate.
-      router.push(AUTHENTICATED_DESTINATION);
+      const { data: auth } = await supabase.auth.getUser();
+      const uid = auth.user?.id;
+      let role: string | null = null;
+      if (uid) {
+        const { data: me } = await supabase
+          .from("users")
+          .select("role")
+          .eq("user_id", uid)
+          .single();
+        role = (me?.role as string | null) ?? null;
+      }
+      router.push(destinationForRole(role));
     } catch {
       setFormError("Terjadi kesalahan. Silakan coba lagi.");
     } finally {

@@ -6,7 +6,7 @@ import { type FormEvent, useState } from "react";
 
 import { mapSignUpError } from "@/lib/authErrors";
 import { type FieldErrors, validateRegister } from "@/lib/authValidation";
-import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
+import { destinationForRole } from "@/lib/constants";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
@@ -69,7 +69,12 @@ export default function RegisterPage() {
 
       // 5. Branch on session
       if (data.session) {
-        router.push(AUTHENTICATED_DESTINATION);
+        const { data: me } = await supabase
+          .from("users")
+          .select("role")
+          .eq("user_id", user.id)
+          .single();
+        router.push(destinationForRole((me?.role as string | null) ?? null));
       } else if (user.identities && user.identities.length > 0) {
         // Email confirmation required
         setNotice(

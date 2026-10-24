@@ -2,6 +2,7 @@
 
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type Stat = {
@@ -33,6 +34,7 @@ const fmtWeek = (iso: string) => {
 };
 
 export default function CampusDashboard() {
+  const router = useRouter();
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
@@ -58,20 +60,18 @@ export default function CampusDashboard() {
         });
 
       const { data: me } = await supabase.from("users").select("role").eq("user_id", auth.user.id).single();
-      if (me?.role !== "konselor" && me?.role !== "admin")
-        return setState({
-          status: "error",
-          title: "Akses khusus Unit Konseling",
-          message: "Akunmu terdaftar sebagai mahasiswa. Jika kamu konselor, minta admin mengubah peran akunmu.",
-          action: { href: "/", label: "Kembali ke beranda" },
-        });
+      if (me?.role !== "konselor" && me?.role !== "admin") {
+        // Mahasiswa/role tak dikenal: arahkan ke halaman mahasiswa, bukan tampilkan error.
+        router.replace("/dashboard");
+        return;
+      }
 
       const { data, error } = await supabase.rpc("campus_wellbeing_stats");
       if (error)
         return setState({ status: "error", title: "Gagal memuat data", message: `${error.message}. Coba muat ulang halaman.` });
       setState({ status: "ready", stats: data as Stat[] });
     })();
-  }, []);
+  }, [router]);
 
   return (
     <div className="min-h-screen">
