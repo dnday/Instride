@@ -10,13 +10,14 @@
 -- ===============================================================
 CREATE OR REPLACE FUNCTION public.protect_user_columns()
 RETURNS TRIGGER
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
+LANGUAGE plpgsql SECURITY INVOKER SET search_path = public
 AS $$
 BEGIN
-    -- Service_role (via set_user_role) boleh mengubah role/user_id.
+    -- Hanya set_user_role() (flag txn-local) atau koneksi service_role
+    -- langsung yang boleh ubah role/user_id. Tidak pakai session_user
+    -- agar aman di PostgreST (session_user=authenticator) maupun harness.
     IF current_setting('role_change.allow', true) = 'on'
-       OR current_user IN ('service_role', 'postgres')
-       OR session_user IN ('service_role', 'postgres') THEN
+       OR current_user IN ('service_role', 'postgres') THEN
         RETURN NEW;
     END IF;
 
