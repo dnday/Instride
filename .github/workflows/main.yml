@@ -82,7 +82,7 @@ jobs:
         if: env.SUPABASE_ACCESS_TOKEN != ''
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db push --remote
+          supabase db push --remote --yes
 
   deploy:
     if: github.event_name != 'pull_request'
