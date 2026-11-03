@@ -28,7 +28,7 @@ Validasi diterapkan pada sisi frontend dan backend.
 |---|---|---|
 | `name` | Yes | Tidak boleh kosong |
 | `email` | Yes | Tidak boleh kosong dan harus memiliki format email yang valid |
-| `password` | Yes | Tidak boleh kosong |
+| `password` | Yes | Tidak boleh kosong, minimal 6 karakter |
 
 ### Rules
 
@@ -39,6 +39,7 @@ Validasi diterapkan pada sisi frontend dan backend.
 - `email` harus memiliki format email yang valid.
 - `password` wajib diisi.
 - `password` tidak boleh kosong.
+- `password` minimal 6 karakter (sama dengan `minimum_password_length` Supabase Auth). Pesan: `Password minimal 6 karakter`.
 - Sistem harus menolak input apabila salah satu field wajib tidak tersedia atau kosong.
 
 ### Valid Example

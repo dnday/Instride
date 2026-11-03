@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
-import { mapSignUpError } from "@/lib/authErrors";
+import { AUTH_ERROR_MESSAGES, isExistingUserSignUp, mapSignUpError } from "@/lib/authErrors";
 import { type FieldErrors, validateRegister } from "@/lib/authValidation";
 import { destinationForRole } from "@/lib/constants";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
@@ -68,21 +68,21 @@ export default function RegisterPage() {
       }
 
       // 5. Branch on session
-      if (data.session) {
+      if (isExistingUserSignUp(user)) {
+        // Konfirmasi email aktif: Supabase tidak mengembalikan error untuk email terdaftar
+        setFormError(AUTH_ERROR_MESSAGES.emailInUse);
+      } else if (data.session) {
         const { data: me } = await supabase
           .from("users")
           .select("role")
           .eq("user_id", user.id)
           .single();
         router.push(destinationForRole((me?.role as string | null) ?? null));
-      } else if (user.identities && user.identities.length > 0) {
+      } else {
         // Email confirmation required
         setNotice(
           "Registrasi berhasil! Silakan cek email untuk konfirmasi, kemudian masuk melalui halaman login."
         );
-      } else {
-        // No session, no confirmation
-        setFormError("Registrasi tidak dapat diselesaikan.");
       }
     } catch {
       setFormError("Terjadi kesalahan. Silakan coba lagi.");

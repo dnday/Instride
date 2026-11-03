@@ -6,9 +6,11 @@ export const CAMPUS_DESTINATION = "/campus-dashboard";
 
 /**
  * @deprecated Use destinationForRole or the role-specific constants.
- * Kept as an alias so existing imports do not break.
+ * Kept as an alias so existing imports do not break. Points to the student
+ * dashboard, which forwards konselor/admin to the campus dashboard; pointing it
+ * at the campus dashboard sent every Google sign-in there first.
  */
-export const AUTHENTICATED_DESTINATION = CAMPUS_DESTINATION;
+export const AUTHENTICATED_DESTINATION = STUDENT_DESTINATION;
 
 /**
  * Returns the post-login destination route based on the user role.

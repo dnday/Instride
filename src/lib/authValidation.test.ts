@@ -36,6 +36,11 @@ describe("Register", () => {
     expect(r.errors).toEqual({ password: MESSAGES.passwordRequired });
   });
 
+  test("password kurang dari 6 karakter ditolak saat daftar", () => {
+    expect(validateRegister({ ...valid, password: "12345" }).errors).toEqual({ password: MESSAGES.passwordTooShort });
+    expect(validateRegister({ ...valid, password: "123456" }).ok).toBe(true);
+  });
+
   test("beberapa field kosong dilaporkan sekaligus (VALIDATION_RULES 5)", () => {
     expect(validateRegister({ name: "", email: "x", password: "" }).errors).toEqual({
       name: MESSAGES.nameRequired,
@@ -58,6 +63,10 @@ describe("Login", () => {
 
   test("TC-AUTH-008 format email tidak valid ditolak dengan error pada field email", () => {
     expect(validateLogin({ ...login, email: "mahasiswa.example.com" }).errors).toEqual({ email: MESSAGES.emailInvalid });
+  });
+
+  test("login tidak membatasi panjang password (akun lama tetap bisa masuk)", () => {
+    expect(validateLogin({ ...login, password: "123" }).ok).toBe(true);
   });
 
   test("TC-AUTH-009 password kosong ditolak dengan error pada field password", () => {
