@@ -21,12 +21,16 @@ export interface ValidationResult {
   errors: FieldErrors;
 }
 
+/** Minimum password length, matching Supabase Auth (auth.minimum_password_length). */
+export const PASSWORD_MIN_LENGTH = 6;
+
 /** Indonesian validation messages, matching VALIDATION_RULES.md. */
 export const MESSAGES = {
   nameRequired: "Field name wajib diisi",
   emailRequired: "Field email wajib diisi",
   emailInvalid: "Format email tidak valid",
   passwordRequired: "Field password wajib diisi",
+  passwordTooShort: `Password minimal ${PASSWORD_MIN_LENGTH} karakter`,
 } as const;
 
 /**
@@ -67,7 +71,12 @@ export function validateRegister(input: RegisterInput): ValidationResult {
     errors.email = MESSAGES.emailInvalid;
   }
 
-  if (isEmpty(input.password)) errors.password = MESSAGES.passwordRequired;
+  if (isEmpty(input.password)) {
+    errors.password = MESSAGES.passwordRequired;
+  } else if (input.password.length < PASSWORD_MIN_LENGTH) {
+    // Hanya saat daftar: akun lama tetap bisa login apa pun panjang password-nya
+    errors.password = MESSAGES.passwordTooShort;
+  }
 
   return { ok: Object.keys(errors).length === 0, errors };
 }

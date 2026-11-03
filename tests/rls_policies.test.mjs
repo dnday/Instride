@@ -90,6 +90,48 @@ test("Property 3 / R10.3: role & user_id immutable oleh mahasiswa", async () => 
   assert.equal(n.name, "Alice Baru");
 });
 
+test("email profil tidak bisa diubah mahasiswa, tapi ikut perubahan di auth.users", async () => {
+  await as("authenticated", ALICE, `UPDATE users SET email = 'u2@ugm.ac.id' WHERE user_id = '${ALICE}'`);
+  const [a] = await as("authenticated", ALICE, "SELECT email FROM users");
+  assert.equal(a.email, "u1@ugm.ac.id", "email tidak boleh berubah lewat API");
+  // Email yang belum terdaftar tetap bisa dipakai signup oleh pemiliknya
+  await as("authenticated", ALICE, `UPDATE users SET email = 'calon@ugm.ac.id' WHERE user_id = '${ALICE}'`);
+  await db.exec(`INSERT INTO auth.users VALUES ('${id(70)}', 'calon@ugm.ac.id', '{"name":"Calon"}')`);
+  const [c] = (await db.query(`SELECT email FROM public.users WHERE user_id = '${id(70)}'`)).rows;
+  assert.equal(c.email, "calon@ugm.ac.id");
+  // Ganti email di Supabase Auth -> profil ikut tersinkron
+  await db.exec(`UPDATE auth.users SET email = 'alice.baru@ugm.ac.id' WHERE id = '${ALICE}'`);
+  const [s] = (await db.query(`SELECT email FROM public.users WHERE user_id = '${ALICE}'`)).rows;
+  assert.equal(s.email, "alice.baru@ugm.ac.id");
+});
+
+test("konselor tidak bisa mencatat mood/jurnal (tidak mencemari statistik kampus)", async () => {
+  await assert.rejects(as("authenticated", KONSELOR, `INSERT INTO moods (user_id, mood_value) VALUES ('${KONSELOR}', 3)`));
+  await assert.rejects(as("authenticated", KONSELOR, `INSERT INTO journals (user_id, content) VALUES ('${KONSELOR}', 'x')`));
+});
+
+test("recorded_at/created_at ditentukan server, tidak bisa dimanipulasi client", async () => {
+  await as("authenticated", ALICE, `INSERT INTO moods (user_id, mood_value, recorded_at) VALUES ('${ALICE}', 2, '2020-01-01')`);
+  await as("authenticated", ALICE, `INSERT INTO journals (user_id, content, created_at) VALUES ('${ALICE}', 'mundur', '2020-01-01')`);
+  const old = (await db.query(`
+    SELECT (SELECT count(*) FROM moods WHERE recorded_at < '2021-01-01') +
+           (SELECT count(*) FROM journals WHERE created_at < '2021-01-01') AS n`)).rows[0];
+  assert.equal(Number(old.n), 0, "tanggal lampau dari client diabaikan saat insert");
+
+  await as("authenticated", ALICE, `UPDATE moods SET recorded_at = '2020-01-01' WHERE user_id = '${ALICE}'`);
+  await as("authenticated", ALICE, `UPDATE journals SET created_at = '2020-01-01' WHERE user_id = '${ALICE}'`);
+  const moved = (await db.query(`
+    SELECT (SELECT count(*) FROM moods WHERE recorded_at < '2021-01-01') +
+           (SELECT count(*) FROM journals WHERE created_at < '2021-01-01') AS n`)).rows[0];
+  assert.equal(Number(moved.n), 0, "tanggal tidak bisa digeser lewat update");
+});
+
+test("isi jurnal dibatasi 5000 karakter dan tidak boleh kosong di database", async () => {
+  await as("authenticated", ALICE, `INSERT INTO journals (user_id, content) VALUES ('${ALICE}', repeat('a', 5000))`);
+  await assert.rejects(as("authenticated", ALICE, `INSERT INTO journals (user_id, content) VALUES ('${ALICE}', repeat('a', 5001))`));
+  await assert.rejects(as("authenticated", ALICE, `INSERT INTO journals (user_id, content) VALUES ('${ALICE}', '   ')`));
+});
+
 test("R10.5: set_user_role hanya via service_role", async () => {
   await assert.rejects(as("authenticated", ALICE, `SELECT set_user_role('${BOB}', 'konselor')`));
   await as("service_role", null, `SELECT set_user_role('${BOB}', 'konselor')`);

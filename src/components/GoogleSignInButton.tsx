@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { AUTHENTICATED_DESTINATION } from "@/lib/constants";
+import { destinationForRole, STUDENT_DESTINATION } from "@/lib/constants";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 /**
@@ -74,9 +74,11 @@ function GisButton({ clientId, signup }: { clientId: string; signup: boolean }) 
           use_fedcm_for_prompt: true,
           callback: async ({ credential }) => {
             setError(null);
-            const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
+            const { data, error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
             if (error) return setError("Gagal masuk dengan Google. Silakan coba lagi.");
-            router.push(AUTHENTICATED_DESTINATION);
+            // Tujuan mengikuti role, sama seperti login email
+            const { data: me } = await supabase.from("users").select("role").eq("user_id", data.user?.id ?? "").maybeSingle();
+            router.push(destinationForRole((me?.role as string | null) ?? null));
           },
         });
         gsi.renderButton(box.current, {
@@ -120,7 +122,8 @@ function RedirectButton({ label }: { label: string }) {
       const { error } = await getSupabaseClient().auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${AUTHENTICATED_DESTINATION}`,
+          // Dashboard mahasiswa meneruskan konselor/admin ke campus dashboard
+          redirectTo: `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}${STUDENT_DESTINATION}`,
         },
       });
       // Jika berhasil, browser diarahkan ke halaman Google sehingga kode di bawah tidak berlanjut

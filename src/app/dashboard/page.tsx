@@ -12,7 +12,7 @@ const PRIMARY = "#4FA7A1";
 type State =
   | { status: "loading" }
   | { status: "configError"; message: string }
-  | { status: "ready"; userId: string; todayMood: boolean; todayJournal: boolean };
+  | { status: "ready"; userId: string; todayMood: boolean; todayJournal: boolean; warning?: string };
 
 function todayRange(now: Date = new Date()): { startIso: string; endIso: string } {
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -61,6 +61,11 @@ export default function DashboardPage() {
         userId: auth.user.id,
         todayMood: (moodRes.data?.length ?? 0) > 0,
         todayJournal: (journalRes.data?.length ?? 0) > 0,
+        // Jangan diam-diam menganggap belum ada entri kalau pengecekan gagal
+        warning:
+          moodRes.error || journalRes.error
+            ? "Status catatan hari ini gagal dimuat. Periksa koneksi sebelum menyimpan lagi."
+            : undefined,
       });
     })();
   }, [router]);
@@ -80,6 +85,11 @@ export default function DashboardPage() {
         )}
         {state.status === "ready" && (
           <>
+            {state.warning && (
+              <p className="rounded bg-yellow-50 p-3 text-sm text-yellow-800" role="status">
+                {state.warning}
+              </p>
+            )}
             <MoodForm userId={state.userId} alreadyToday={state.todayMood} onSaved={() => undefined} />
             <JournalForm userId={state.userId} alreadyToday={state.todayJournal} onSaved={() => undefined} />
           </>
