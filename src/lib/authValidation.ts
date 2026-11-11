@@ -24,9 +24,13 @@ export interface ValidationResult {
 /** Minimum password length, matching Supabase Auth (auth.minimum_password_length). */
 export const PASSWORD_MIN_LENGTH = 6;
 
+/** Maximum name length, matching the users_name_check constraint in the database. */
+export const NAME_MAX_LENGTH = 100;
+
 /** Indonesian validation messages, matching VALIDATION_RULES.md. */
 export const MESSAGES = {
   nameRequired: "Field name wajib diisi",
+  nameTooLong: `Nama maksimal ${NAME_MAX_LENGTH} karakter`,
   emailRequired: "Field email wajib diisi",
   emailInvalid: "Format email tidak valid",
   passwordRequired: "Field password wajib diisi",
@@ -63,7 +67,12 @@ function isEmpty(value: string): boolean {
 export function validateRegister(input: RegisterInput): ValidationResult {
   const errors: FieldErrors = {};
 
-  if (isEmpty(input.name)) errors.name = MESSAGES.nameRequired;
+  if (isEmpty(input.name)) {
+    errors.name = MESSAGES.nameRequired;
+  } else if (input.name.trim().length > NAME_MAX_LENGTH) {
+    // Nama dikirim dalam bentuk trim, jadi panjangnya dihitung setelah trim
+    errors.name = MESSAGES.nameTooLong;
+  }
 
   if (isEmpty(input.email)) {
     errors.email = MESSAGES.emailRequired;

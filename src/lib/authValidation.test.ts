@@ -36,6 +36,12 @@ describe("Register", () => {
     expect(r.errors).toEqual({ password: MESSAGES.passwordRequired });
   });
 
+  test("nama lebih dari 100 karakter ditolak, tepat 100 diterima (dihitung setelah trim)", () => {
+    expect(validateRegister({ ...valid, name: "a".repeat(101) }).errors).toEqual({ name: MESSAGES.nameTooLong });
+    expect(validateRegister({ ...valid, name: "a".repeat(100) }).ok).toBe(true);
+    expect(validateRegister({ ...valid, name: `  ${"a".repeat(100)}  ` }).ok).toBe(true);
+  });
+
   test("password kurang dari 6 karakter ditolak saat daftar", () => {
     expect(validateRegister({ ...valid, password: "12345" }).errors).toEqual({ password: MESSAGES.passwordTooShort });
     expect(validateRegister({ ...valid, password: "123456" }).ok).toBe(true);

@@ -4,15 +4,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
-import MoodForm from "./MoodForm";
-import JournalForm from "./JournalForm";
+import DailyEntryForm from "./DailyEntryForm";
 
 const PRIMARY = "#4FA7A1";
 
 type State =
   | { status: "loading" }
   | { status: "configError"; message: string }
-  | { status: "ready"; userId: string; todayMood: boolean; todayJournal: boolean; warning?: string };
+  | { status: "ready"; alreadyToday: boolean; warning?: string };
 
 function todayRange(now: Date = new Date()): { startIso: string; endIso: string } {
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -58,9 +57,8 @@ export default function DashboardPage() {
       ]);
       setState({
         status: "ready",
-        userId: auth.user.id,
-        todayMood: (moodRes.data?.length ?? 0) > 0,
-        todayJournal: (journalRes.data?.length ?? 0) > 0,
+        // Jurnal lama bisa tersimpan tanpa mood, jadi keduanya tetap dicek
+        alreadyToday: (moodRes.data?.length ?? 0) > 0 || (journalRes.data?.length ?? 0) > 0,
         // Jangan diam-diam menganggap belum ada entri kalau pengecekan gagal
         warning:
           moodRes.error || journalRes.error
@@ -90,8 +88,7 @@ export default function DashboardPage() {
                 {state.warning}
               </p>
             )}
-            <MoodForm userId={state.userId} alreadyToday={state.todayMood} onSaved={() => undefined} />
-            <JournalForm userId={state.userId} alreadyToday={state.todayJournal} onSaved={() => undefined} />
+            <DailyEntryForm alreadyToday={state.alreadyToday} />
           </>
         )}
       </main>
