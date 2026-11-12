@@ -77,29 +77,30 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFA] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-lg border p-8">
-        <h1 className="text-2xl font-bold text-center text-[#4FA7A1] mb-6">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
+      <Link href="/" className="mb-6 inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
+      <div className="w-full max-w-md card sm:p-8">
+        <h1 className="font-serif text-3xl font-semibold text-center text-ink mb-6">
           Masuk ke Instride
         </h1>
 
         {formError && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-800" role="alert">
+          <div className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">
             {formError}
           </div>
         )}
 
         <GoogleSignInButton />
-        <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
-          <span className="h-px flex-1 bg-gray-200" />
+        <div className="my-6 flex items-center gap-3 text-xs text-muted">
+          <span className="h-px flex-1 bg-brand-100" />
           atau dengan email
-          <span className="h-px flex-1 bg-gray-200" />
+          <span className="h-px flex-1 bg-brand-100" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-ink">
               Email
             </label>
             <input
@@ -107,7 +108,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full mt-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${fieldErrors.email ? "border-red-500" : "border-gray-300"}`}
+              className={`field mt-1 ${fieldErrors.email ? "border-red-500" : ""}`}
               aria-invalid={fieldErrors.email ? "true" : undefined}
               aria-describedby={fieldErrors.email ? "email-error" : undefined}
             />
@@ -120,7 +121,7 @@ export default function LoginPage() {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-ink">
               Password
             </label>
             <input
@@ -128,7 +129,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full mt-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${fieldErrors.password ? "border-red-500" : "border-gray-300"}`}
+              className={`field mt-1 ${fieldErrors.password ? "border-red-500" : ""}`}
               aria-invalid={fieldErrors.password ? "true" : undefined}
               aria-describedby={fieldErrors.password ? "password-error" : undefined}
             />
@@ -142,15 +143,15 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-[#4FA7A1] py-2.5 text-sm font-semibold text-white uppercase tracking-wide hover:bg-[#3E8C87] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4FA7A1]"
+            className="btn w-full"
           >
             {loading ? "Memproses..." : "Masuk"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-ink">
           Belum punya akun?{" "}
-          <Link href="/register" className="text-[#4FA7A1] font-semibold hover:underline">
+          <Link href="/register" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">
             Daftar
           </Link>
         </p>

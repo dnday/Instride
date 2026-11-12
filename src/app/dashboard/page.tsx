@@ -6,12 +6,20 @@ import { useEffect, useState } from "react";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import MoodForm from "./MoodForm";
 import JournalForm from "./JournalForm";
-import { StudentNav } from "@/components/StudentShell";
+import { Loading, StudentNav } from "@/components/StudentShell";
+
+const today = () => new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
+function greeting(hour = new Date().getHours()) {
+  if (hour < 11) return "Selamat pagi";
+  if (hour < 15) return "Selamat siang";
+  if (hour < 18) return "Selamat sore";
+  return "Selamat malam";
+}
 
 type State =
   | { status: "loading" }
   | { status: "configError"; message: string }
-  | { status: "ready"; userId: string; todayMood: boolean; todayJournal: boolean; warning?: string };
+  | { status: "ready"; userId: string; name: string; todayMood: boolean; todayJournal: boolean; warning?: string };
 
 function todayRange(now: Date = new Date()): { startIso: string; endIso: string } {
   const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -43,7 +51,7 @@ export default function DashboardPage() {
       // Konselor/admin salah halaman: arahkan ke campus dashboard.
       const { data: me } = await supabase
         .from("users")
-        .select("role")
+        .select("role, name")
         .eq("user_id", auth.user.id)
         .single();
       if (me?.role === "konselor" || me?.role === "admin") {
@@ -58,6 +66,7 @@ export default function DashboardPage() {
       setState({
         status: "ready",
         userId: auth.user.id,
+        name: (me?.name as string | undefined)?.split(" ")[0] ?? "",
         todayMood: (moodRes.data?.length ?? 0) > 0,
         todayJournal: (journalRes.data?.length ?? 0) > 0,
         // Jangan diam-diam menganggap belum ada entri kalau pengecekan gagal
@@ -70,20 +79,25 @@ export default function DashboardPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#F8FAFA] text-gray-900">
+    <div className="min-h-screen bg-surface text-ink">
       <StudentNav />
 
-      <main className="max-w-2xl mx-auto p-4 sm:p-8 space-y-6">
-        <h2 className="text-2xl font-semibold">Catatan Harian</h2>
+      <main className="max-w-2xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
+        <div>
+          <p className="text-sm font-medium text-muted">{today()}</p>
+          <h1 className="mt-1 font-serif text-3xl font-semibold text-ink">
+            {greeting()}{state.status === "ready" && state.name ? `, ${state.name}` : ""}
+          </h1>
+        </div>
 
-        {state.status === "loading" && <p>Memuat...</p>}
+        {state.status === "loading" && <Loading />}
         {state.status === "configError" && (
           <p className="text-red-600" role="alert">{state.message}</p>
         )}
         {state.status === "ready" && (
           <>
             {state.warning && (
-              <p className="rounded bg-yellow-50 p-3 text-sm text-yellow-800" role="status">
+              <p className="rounded-xl bg-yellow-50 p-3 text-sm text-yellow-800" role="status">
                 {state.warning}
               </p>
             )}

@@ -98,18 +98,19 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFA] flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-lg border p-8">
-        <h1 className="text-2xl font-bold text-center text-[#4FA7A1] mb-6">
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
+      <Link href="/" className="mb-6 inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
+      <div className="w-full max-w-md card sm:p-8">
+        <h1 className="font-serif text-3xl font-semibold text-center text-ink mb-6">
           Buat Akun Instride
         </h1>
 
         {notice && (
-          <div className="mb-4 rounded bg-green-50 p-3 text-sm text-green-800" role="status">
+          <div className="mb-4 rounded-xl bg-brand-50 p-3 text-sm text-brand-900" role="status">
             <p>{notice}</p>
             <Link
               href="/login"
-              className="underline font-semibold"
+              className="font-semibold text-brand-700 underline"
             >
               Ke halaman login
             </Link>
@@ -117,13 +118,13 @@ export default function RegisterPage() {
         )}
 
         {formError && (
-          <div className="mb-4 rounded bg-red-50 p-3 text-sm text-red-800" role="alert">
+          <div className="mb-4 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">
             {formError}
           </div>
         )}
 
-        <div className="mb-6 rounded-md border border-gray-200 bg-gray-50 p-3">
-          <label className="flex items-start gap-3 text-sm text-gray-700">
+        <div className="mb-6 rounded-xl border border-brand-100 bg-surface p-3">
+          <label className="flex items-start gap-3 text-sm text-ink">
             <input
               type="checkbox"
               checked={consent}
@@ -138,7 +139,7 @@ export default function RegisterPage() {
             <span>
               Saya menyetujui mood dan jurnal saya diproses untuk analisis sentimen dan statistik kampus yang anonim,
               sesuai{" "}
-              <Link href="/privasi" className="font-semibold text-[#2A7470] underline">
+              <Link href="/privasi" className="font-semibold text-brand-700 underline">
                 Kebijakan Privasi
               </Link>
               .
@@ -154,20 +155,20 @@ export default function RegisterPage() {
         {consent ? (
           <GoogleSignInButton label="Daftar dengan Google" />
         ) : (
-          <p className="rounded-md border border-dashed border-gray-300 py-2.5 text-center text-sm text-gray-500">
+          <p className="rounded-xl border border-dashed border-brand-100 py-2.5 text-center text-sm text-muted">
             Centang persetujuan di atas untuk daftar dengan Google
           </p>
         )}
-        <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
-          <span className="h-px flex-1 bg-gray-200" />
+        <div className="my-6 flex items-center gap-3 text-xs text-muted">
+          <span className="h-px flex-1 bg-brand-100" />
           atau dengan email
-          <span className="h-px flex-1 bg-gray-200" />
+          <span className="h-px flex-1 bg-brand-100" />
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Nama */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="name" className="block text-sm font-medium text-ink">
               Nama
             </label>
             <input
@@ -175,7 +176,7 @@ export default function RegisterPage() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className={`w-full mt-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${fieldErrors.name ? "border-red-500" : "border-gray-300"}`}
+              className={`field mt-1 ${fieldErrors.name ? "border-red-500" : ""}`}
               aria-invalid={fieldErrors.name ? "true" : undefined}
               aria-describedby={fieldErrors.name ? "name-error" : undefined}
             />
@@ -188,7 +189,7 @@ export default function RegisterPage() {
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="email" className="block text-sm font-medium text-ink">
               Email
             </label>
             <input
@@ -196,7 +197,7 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full mt-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${fieldErrors.email ? "border-red-500" : "border-gray-300"}`}
+              className={`field mt-1 ${fieldErrors.email ? "border-red-500" : ""}`}
               aria-invalid={fieldErrors.email ? "true" : undefined}
               aria-describedby={fieldErrors.email ? "email-error" : undefined}
             />
@@ -209,7 +210,7 @@ export default function RegisterPage() {
 
           {/* Password */}
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="password" className="block text-sm font-medium text-ink">
               Password
             </label>
             <input
@@ -217,7 +218,7 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full mt-1 rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${fieldErrors.password ? "border-red-500" : "border-gray-300"}`}
+              className={`field mt-1 ${fieldErrors.password ? "border-red-500" : ""}`}
               aria-invalid={fieldErrors.password ? "true" : undefined}
               aria-describedby={fieldErrors.password ? "password-error" : undefined}
             />
@@ -231,15 +232,15 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-[#4FA7A1] py-2.5 text-sm font-semibold text-white uppercase tracking-wide hover:bg-[#3E8C87] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4FA7A1]"
+            className="btn w-full"
           >
             {loading ? "Memproses..." : "Daftar"}
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
+        <p className="mt-6 text-center text-sm text-ink">
           Sudah punya akun?{" "}
-          <Link href="/login" className="text-[#4FA7A1] font-semibold hover:underline">
+          <Link href="/login" className="inline-flex min-h-11 items-center font-semibold text-brand-700 hover:underline">
             Masuk
           </Link>
         </p>

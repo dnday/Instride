@@ -68,12 +68,12 @@ export default function JournalForm({
   }
 
   return (
-    <section className="bg-white rounded-lg border p-6">
-      <h2 className="font-semibold text-gray-900">Jurnal Hari Ini</h2>
-      <p className="mt-1 text-sm text-gray-500">Tuliskan apa yang kamu rasakan hari ini.</p>
+    <section className="card">
+      <h2 className="font-serif text-xl font-semibold text-ink">Jurnal hari ini</h2>
+      <p className="mt-1 text-sm text-muted">Tuliskan apa yang terjadi dan apa yang kamu rasakan.</p>
 
       {confirmed && (
-        <p className="mt-3 rounded bg-green-50 p-2 text-sm text-green-800" role="status">
+        <p className="mt-3 rounded-xl bg-brand-50 p-3 text-sm text-brand-900" role="status">
           Jurnal hari ini sudah tercatat.
         </p>
       )}
@@ -81,7 +81,7 @@ export default function JournalForm({
       {needsHelp && <CrisisNotice />}
 
       {formError && (
-        <p className="mt-3 rounded bg-red-50 p-2 text-sm text-red-800" role="alert">
+        <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
         </p>
       )}
@@ -91,11 +91,12 @@ export default function JournalForm({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={6}
-          placeholder="Hari ini saya merasa..."
+          placeholder="Ceritakan harimu..."
+          aria-label="Isi jurnal"
           aria-invalid={fieldErrors.content ? "true" : undefined}
           aria-describedby={fieldErrors.content ? "journal-error" : undefined}
-          className={`w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#4FA7A1] ${
-            fieldErrors.content ? "border-red-500" : "border-gray-300"
+          className={`w-full rounded-xl border bg-surface px-4 py-3 text-base leading-relaxed text-ink placeholder:text-muted ${
+            fieldErrors.content ? "border-red-500" : "border-brand-100"
           }`}
         />
 
@@ -105,9 +106,14 @@ export default function JournalForm({
               {fieldErrors.content}
             </p>
           ) : (
-            <span />
+            <span className="flex items-center gap-1.5 text-xs text-muted">
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+              Hanya kamu yang bisa membaca jurnal ini
+            </span>
           )}
-          <span className={`text-xs ${over ? "text-red-600 font-semibold" : "text-gray-400"}`}>
+          <span className={`text-xs ${over ? "text-red-600 font-semibold" : "text-muted"}`}>
             {content.length}/{JOURNAL_CHAR_LIMIT}
           </span>
         </div>
@@ -115,7 +121,7 @@ export default function JournalForm({
         <button
           type="submit"
           disabled={submitting}
-          className="mt-4 w-full rounded-md bg-[#4FA7A1] py-2.5 text-sm font-semibold text-white hover:bg-[#3E8C87] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4FA7A1]"
+          className="btn mt-4 w-full"
         >
           {submitting ? "Memproses..." : "Simpan Jurnal"}
         </button>
