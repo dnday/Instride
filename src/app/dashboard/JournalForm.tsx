@@ -11,6 +11,8 @@ import {
   validateJournal,
 } from "@/lib/journalValidation";
 import { getSupabaseClient } from "@/lib/supabaseClient";
+import { hasCrisisLanguage } from "@/lib/crisis";
+import { CrisisNotice } from "@/components/CrisisNotice";
 
 export default function JournalForm({
   alreadyToday,
@@ -26,6 +28,7 @@ export default function JournalForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(alreadyToday);
+  const [needsHelp, setNeedsHelp] = useState(false);
 
   const over = isOverLimit(content);
 
@@ -53,6 +56,7 @@ export default function JournalForm({
         setFormError(mapSaveError(error).message);
         return;
       }
+      setNeedsHelp(hasCrisisLanguage(content));
       setContent("");
       setConfirmed(true);
       onSaved();
@@ -73,6 +77,8 @@ export default function JournalForm({
           Jurnal hari ini sudah tercatat.
         </p>
       )}
+
+      {needsHelp && <CrisisNotice />}
 
       {formError && (
         <p className="mt-3 rounded bg-red-50 p-2 text-sm text-red-800" role="alert">

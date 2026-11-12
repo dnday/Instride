@@ -45,6 +45,21 @@ describe("JournalForm", () => {
     expect(onSaved).toHaveBeenCalled();
   });
 
+  it("shows crisis help after saving a journal with self-harm language, not otherwise", async () => {
+    const { unmount } = render(<JournalForm userId="u1" alreadyToday={false} onSaved={() => {}} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "hari ini capek tugas" } });
+    fireEvent.submit(screen.getByRole("button", { name: /simpan jurnal/i }).closest("form")!);
+    expect(await screen.findByText(/sudah tercatat/i)).toBeInTheDocument();
+    expect(screen.queryByText(/tidak harus menghadapinya sendirian/i)).toBeNull();
+    unmount();
+
+    render(<JournalForm userId="u1" alreadyToday={false} onSaved={() => {}} />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "rasanya pengen mati aja" } });
+    fireEvent.submit(screen.getByRole("button", { name: /simpan jurnal/i }).closest("form")!);
+    expect(await screen.findByText(/tidak harus menghadapinya sendirian/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /119 ext\. 8/ })).toHaveAttribute("href", "tel:119");
+  });
+
   it("keeps content and shows mapped error on failure", async () => {
     insert.mockResolvedValue({ error: { message: "Failed to fetch" } });
     render(<JournalForm userId="u1" alreadyToday={false} onSaved={() => {}} />);
