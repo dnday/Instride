@@ -97,10 +97,10 @@ jobs:
           SENTIMENT_KEY: ${{ secrets.SENTIMENT_KEY }}
         run: |
           if [ -n "$SENTIMENT_URL" ] && [ -n "$SENTIMENT_KEY" ]; then
-            supabase secrets set SENTIMENT_URL="$SENTIMENT_URL" SENTIMENT_KEY="$SENTIMENT_KEY" --project-ref "$SUPABASE_PROJECT_REF"
+            supabase secrets set SENTIMENT_URL="$SENTIMENT_URL" SENTIMENT_KEY="$SENTIMENT_KEY" --project-ref "$SUPABASE_PROJECT_REF" --yes
           fi
-          if [ -n "$HF_TOKEN" ]; then supabase secrets set HF_TOKEN="$HF_TOKEN" --project-ref "$SUPABASE_PROJECT_REF"; fi
-          if [ -n "$HF_MODEL" ]; then supabase secrets set HF_MODEL="$HF_MODEL" --project-ref "$SUPABASE_PROJECT_REF"; fi
+          if [ -n "$HF_TOKEN" ]; then supabase secrets set HF_TOKEN="$HF_TOKEN" --project-ref "$SUPABASE_PROJECT_REF" --yes; fi
+          if [ -n "$HF_MODEL" ]; then supabase secrets set HF_MODEL="$HF_MODEL" --project-ref "$SUPABASE_PROJECT_REF" --yes; fi
           supabase functions deploy analyze-sentiment --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
           supabase functions deploy delete-account --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
 
