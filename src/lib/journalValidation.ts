@@ -8,6 +8,11 @@ export interface JournalInput {
   content: string;
 }
 
+export interface JournalValidationOptions {
+  /** When true, empty (or whitespace-only) content is accepted. */
+  optional?: boolean;
+}
+
 export interface JournalValidationResult {
   /** True when the content is valid. */
   ok: boolean;
@@ -25,16 +30,18 @@ export const JOURNAL_MESSAGES = {
 
 /**
  * Validates journal content. Rejects content that is empty after trimming
- * (contentRequired), and content whose raw length exceeds JOURNAL_CHAR_LIMIT
- * (contentTooLong). Accepts content with trimmed length >= 1 and raw length
- * <= the limit.
+ * (contentRequired) unless `optional` is set, and content whose raw length
+ * exceeds JOURNAL_CHAR_LIMIT (contentTooLong).
  */
-export function validateJournal(input: JournalInput): JournalValidationResult {
+export function validateJournal(
+  input: JournalInput,
+  options: JournalValidationOptions = {},
+): JournalValidationResult {
   const errors: JournalFieldErrors = {};
   const { content } = input;
 
   if (content.trim().length === 0) {
-    errors.content = JOURNAL_MESSAGES.contentRequired;
+    if (!options.optional) errors.content = JOURNAL_MESSAGES.contentRequired;
   } else if (content.length > JOURNAL_CHAR_LIMIT) {
     errors.content = JOURNAL_MESSAGES.contentTooLong;
   }

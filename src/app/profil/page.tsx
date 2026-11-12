@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
 import { ErrorNote, Loading, type Session, StudentPage, useStudent } from "@/components/StudentShell";
-import { MESSAGES, PASSWORD_MIN_LENGTH } from "@/lib/authValidation";
+import { MESSAGES, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/authValidation";
 
 type Note = { ok: boolean; text: string } | null;
 
@@ -42,7 +42,7 @@ function Settings({ supabase, user }: Session) {
     e.preventDefault();
     const value = name.trim();
     if (!value) return setNameNote({ ok: false, text: MESSAGES.nameRequired });
-    if (value.length > 255) return setNameNote({ ok: false, text: "Nama maksimal 255 karakter" });
+    if (value.length > NAME_MAX_LENGTH) return setNameNote({ ok: false, text: MESSAGES.nameTooLong });
     setBusy("name");
     // Hanya kolom name yang boleh diubah user (email & role dijaga trigger database)
     const { error } = await supabase.from("users").update({ name: value }).eq("user_id", user.id);

@@ -54,6 +54,16 @@ describe("mapSaveError", () => {
     expect(mapSaveError({ code: "PGRST301", message: "JWT expired" }).message).toBe(SAVE_ERROR_MESSAGES.noSession);
   });
 
+  test("save_daily_entry tanpa sesi (28000) -> sesi berakhir", () => {
+    expect(mapSaveError({ code: "28000", message: "Sesi tidak valid" }).kind).toBe("no_session");
+  });
+
+  test("save_daily_entry mood di luar 1-5 (22023) -> pesan mood", () => {
+    expect(mapSaveError({ code: "22023", message: "Mood harus bernilai antara 1 sampai 5" }).message).toBe(
+      SAVE_ERROR_MESSAGES.invalidMood,
+    );
+  });
+
   test("CHECK isi jurnal -> pesan validasi", () => {
     expect(mapSaveError({ code: "23514", message: 'violates check constraint "journals_content_check"' }).kind).toBe(
       "invalid_content",
