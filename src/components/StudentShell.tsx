@@ -9,11 +9,11 @@ import { CAMPUS_DESTINATION } from "@/lib/constants";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 const NAV = [
-  { href: "/dashboard", label: "Catatan" },
-  { href: "/ringkasan", label: "Dashboard Saya" },
-  { href: "/riwayat", label: "Riwayat" },
-  { href: "/profil", label: "Profil" },
-  { href: "/bantuan", label: "Bantuan" },
+  { href: "/dashboard", label: "Catatan", short: "Catatan", icon: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" },
+  { href: "/ringkasan", label: "Dashboard Saya", short: "Tren", icon: "M4 19V5m0 14h16M8 15l3-4 3 2 4-6" },
+  { href: "/riwayat", label: "Riwayat", short: "Riwayat", icon: "M12 8v4l3 2M3.05 11a9 9 0 1 1 .5 4M3 4v5h5" },
+  { href: "/bantuan", label: "Bantuan", short: "Bantuan", icon: "M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z" },
+  { href: "/profil", label: "Profil", short: "Profil", icon: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 9a7 7 0 0 1 14 0" },
 ];
 
 export type Session = { supabase: SupabaseClient; user: User };
@@ -52,35 +52,58 @@ export function StudentNav() {
       router.replace("/login");
     }
   }
+  const isActive = (href: string) => path === href || path === `${href}/`;
   return (
-    <header className="bg-white border-b border-brand-100">
-      <div className="max-w-5xl mx-auto px-4 sm:px-8 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <Link href="/" className="font-serif text-2xl font-semibold text-brand-900">Instride</Link>
-        <nav aria-label="Navigasi mahasiswa" className="order-3 w-full sm:order-none sm:w-auto sm:flex-1 -mx-1 overflow-x-auto">
-          <ul className="flex gap-1">
-            {NAV.map((n) => {
-              const active = path === n.href || path === `${n.href}/`;
-              return (
+    <>
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-brand-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-8 h-16 flex items-center gap-6">
+          <Link href="/" className="inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
+          <nav aria-label="Navigasi mahasiswa" className="hidden sm:block flex-1">
+            <ul className="flex gap-1">
+              {NAV.map((n) => (
                 <li key={n.href}>
                   <Link
                     href={n.href}
-                    aria-current={active ? "page" : undefined}
+                    aria-current={isActive(n.href) ? "page" : undefined}
                     className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors ${
-                      active ? "bg-brand-50 text-brand-900" : "text-muted hover:text-ink hover:bg-brand-50"
+                      isActive(n.href) ? "bg-brand-50 text-brand-900" : "text-ink hover:bg-brand-50"
                     }`}
                   >
                     {n.label}
                   </Link>
                 </li>
-              );
-            })}
-          </ul>
-        </nav>
-        <button type="button" onClick={logout} className="ml-auto sm:ml-0 min-h-11 px-3 text-sm font-medium text-muted hover:text-ink">
-          Keluar
-        </button>
-      </div>
-    </header>
+              ))}
+            </ul>
+          </nav>
+          <button type="button" onClick={logout} className="ml-auto sm:ml-0 min-h-11 px-3 text-sm font-medium text-ink hover:text-brand-700">
+            Keluar
+          </button>
+        </div>
+      </header>
+
+      {/* Ponsel: tab bawah seperti aplikasi, mudah dijangkau jempol */}
+      <nav aria-label="Navigasi mahasiswa (ponsel)" className="sm:hidden fixed inset-x-0 bottom-0 z-30 border-t border-brand-100 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+        <ul className="grid grid-cols-5">
+          {NAV.map((n) => (
+            <li key={n.href}>
+              <Link
+                href={n.href}
+                aria-current={isActive(n.href) ? "page" : undefined}
+                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
+                  isActive(n.href) ? "text-brand-700" : "text-muted"
+                }`}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor"
+                  strokeWidth={isActive(n.href) ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+                  <path d={n.icon} />
+                </svg>
+                {n.short}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </>
   );
 }
 
@@ -88,7 +111,7 @@ export function StudentPage({ title, intro, children }: { title: string; intro?:
   return (
     <div className="min-h-screen bg-surface">
       <StudentNav />
-      <main className="max-w-5xl mx-auto px-4 sm:px-8 py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
         <div>
           <h1 className="font-serif text-3xl font-semibold text-ink">{title}</h1>
           {intro && <p className="mt-1 text-muted">{intro}</p>}

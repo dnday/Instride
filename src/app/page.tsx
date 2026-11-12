@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const campusSees = ["Rata-rata mood mingguan seluruh kampus", "Persentase sentimen positif, netral, dan negatif", "Jumlah mahasiswa aktif per minggu"];
-const campusNeverSees = ["Nama, email, atau identitasmu", "Isi jurnal pribadimu", "Data minggu dengan kurang dari 5 mahasiswa"];
+const campusNeverSees = ["Nama, email, atau identitasmu", "Isi jurnal pribadimu", "Data minggu dengan kurang dari 10 mahasiswa"];
 
 const CHECK = "M5 12l5 5L20 7";
 const CROSS = "M6 6l12 12M18 6 6 18";
@@ -206,7 +206,7 @@ export default function Home() {
                 ))}
                 <rect x="215" y="52" width="130" height="60" rx="14" fill="#F8FAFA" />
                 <text x="280" y="78" textAnchor="middle" fontSize="13" fontWeight="600" fill="#1F4E4B">Agregat anonim</text>
-                <text x="280" y="97" textAnchor="middle" fontSize="12" fill="#1F4E4B">min. 5 mahasiswa</text>
+                <text x="280" y="97" textAnchor="middle" fontSize="12" fill="#1F4E4B">min. 10 mahasiswa</text>
                 <path d="M345 82 H395" fill="none" stroke="#4FA7A1" strokeWidth="2" />
                 <rect x="395" y="52" width="122" height="60" rx="14" fill="#2A7470" />
                 <rect x="412" y="88" width="14" height="12" rx="2" fill="#CFE9E6" />

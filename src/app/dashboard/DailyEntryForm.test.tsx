@@ -64,6 +64,23 @@ describe("DailyEntryForm", () => {
     expect(onSaved).toHaveBeenCalled();
   });
 
+  it("menampilkan rujukan krisis hanya bila jurnal berisi ungkapan menyakiti diri", async () => {
+    const { unmount } = render(<DailyEntryForm alreadyToday={false} />);
+    pickMood(2);
+    typeJournal("capek sama tugas");
+    submit();
+    expect(await screen.findByText("Catatan harian tersimpan.")).toBeInTheDocument();
+    expect(screen.queryByText(/tidak harus menghadapinya sendirian/i)).toBeNull();
+    unmount();
+
+    render(<DailyEntryForm alreadyToday={false} />);
+    pickMood(1);
+    typeJournal("rasanya pengen mati aja");
+    submit();
+    expect(await screen.findByText(/tidak harus menghadapinya sendirian/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /119 ext\. 8/ })).toHaveAttribute("href", "tel:119");
+  });
+
   it("jurnal kosong/spasi dikirim sebagai null (hanya mood)", async () => {
     render(<DailyEntryForm alreadyToday={false} />);
     pickMood(3);

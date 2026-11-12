@@ -47,16 +47,16 @@ beforeAll(async () => {
 
   await signup(99, "Konselor");
   await db.exec(`UPDATE public.users SET role = 'konselor' WHERE user_id = '${KONSELOR}'`);
-  // Minggu ini: 6 mahasiswa aktif. Dua minggu lalu: hanya 2 mahasiswa.
-  for (let n = 1; n <= 7; n++) await signup(n, `Mahasiswa ${n}`);
-  for (let n = 1; n <= 6; n++) {
+  // Minggu ini: 10 mahasiswa aktif (tepat di ambang k = 10). Dua minggu lalu: hanya 2 mahasiswa.
+  for (let n = 1; n <= 11; n++) await signup(n, `Mahasiswa ${n}`);
+  for (let n = 1; n <= 10; n++) {
     await db.exec(`
       INSERT INTO moods (user_id, mood_value) VALUES ('${id(n)}', ${(n % 5) + 1});
       INSERT INTO journals (user_id, content) VALUES ('${id(n)}', 'isi jurnal');
       INSERT INTO sentiment_analysis (journal_id, sentiment)
         VALUES (currval('journals_journal_id_seq'), '${n % 2 ? "Positif" : "Negatif"}');`);
   }
-  for (const n of [6, 7])
+  for (const n of [10, 11])
     await db.exec(`INSERT INTO moods (user_id, mood_value, recorded_at) VALUES ('${id(n)}', 1, now() - interval '14 days')`);
 }, 60_000);
 
@@ -84,11 +84,20 @@ test("TC-RBAC-003/004 statistik kampus ditolak untuk mahasiswa & anon, diberikan
   assert.ok((await as("authenticated", KONSELOR, "SELECT * FROM campus_wellbeing_stats()")).length > 0); // TC-RBAC-004
 });
 
-test("k-anonymity: minggu dengan < 5 mahasiswa disembunyikan", async () => {
+test("k-anonymity (k = 10): minggu dengan < 10 mahasiswa disembunyikan", async () => {
   const rows = await as("authenticated", KONSELOR, "SELECT * FROM campus_wellbeing_stats()");
-  assert.equal(rows.length, 1, "hanya minggu dengan 6 mahasiswa yang tampil");
-  assert.equal(Number(rows[0].active_students), 6);
+  assert.equal(rows.length, 1, "hanya minggu dengan 10 mahasiswa yang tampil");
+  assert.equal(Number(rows[0].active_students), 10);
   assert.equal(Number(rows[0].positive_percentage), 50);
+});
+
+test("k-anonymity: 9 mahasiswa aktif belum cukup untuk ditampilkan", async () => {
+  // Minggu lalu: 9 mahasiswa mencatat mood
+  for (let n = 1; n <= 9; n++)
+    await db.exec(`INSERT INTO moods (user_id, mood_value, recorded_at) VALUES ('${id(n)}', 3, now() - interval '7 days')`);
+  const rows = await as("authenticated", KONSELOR, "SELECT * FROM campus_wellbeing_stats()");
+  assert.equal(rows.length, 1, "minggu dengan 9 mahasiswa tidak boleh tampil");
+  await db.exec("DELETE FROM moods WHERE recorded_at < now() - interval '6 days' AND recorded_at > now() - interval '8 days'");
 });
 
 test("agregasi terjadwal mengisi wellbeing_aggregation dan hanya bisa dijalankan sistem", async () => {
@@ -98,6 +107,6 @@ test("agregasi terjadwal mengisi wellbeing_aggregation dan hanya bisa dijalankan
   await db.query("SELECT refresh_wellbeing_aggregation()"); // idempoten (upsert)
   const rows = await as("authenticated", KONSELOR, "SELECT * FROM wellbeing_aggregation");
   assert.equal(rows.length, 1);
-  assert.equal(rows[0].active_students, 6);
+  assert.equal(rows[0].active_students, 10);
   assert.equal((await as("authenticated", id(1), "SELECT * FROM wellbeing_aggregation")).length, 0, "mahasiswa tidak boleh baca agregat");
 });
