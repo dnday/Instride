@@ -96,7 +96,7 @@ jobs:
         run: |
           if [ -n "$HF_TOKEN" ]; then supabase secrets set HF_TOKEN="$HF_TOKEN" --project-ref "$SUPABASE_PROJECT_REF"; fi
           if [ -n "$HF_MODEL" ]; then supabase secrets set HF_MODEL="$HF_MODEL" --project-ref "$SUPABASE_PROJECT_REF"; fi
-          supabase functions deploy analyze-sentiment --project-ref "$SUPABASE_PROJECT_REF" --use-api
+          supabase functions deploy analyze-sentiment --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
 
   deploy:
     if: github.event_name != 'pull_request'
