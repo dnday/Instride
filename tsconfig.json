@@ -22,5 +22,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "supabase/functions/analyze-sentiment", "supabase/functions/delete-account", "ml"]
+  "exclude": ["node_modules", "supabase/functions/analyze-sentiment", "supabase/functions/delete-account", "supabase/functions/seed-demo", "ml"]
 }

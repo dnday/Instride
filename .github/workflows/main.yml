@@ -103,6 +103,7 @@ jobs:
           if [ -n "$HF_MODEL" ]; then supabase secrets set HF_MODEL="$HF_MODEL" --project-ref "$SUPABASE_PROJECT_REF" --yes; fi
           supabase functions deploy analyze-sentiment --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
           supabase functions deploy delete-account --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
+          supabase functions deploy seed-demo --project-ref "$SUPABASE_PROJECT_REF" --use-api --yes
 
   deploy:
     if: github.event_name != 'pull_request'

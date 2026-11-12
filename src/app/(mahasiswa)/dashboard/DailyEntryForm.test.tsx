@@ -60,8 +60,12 @@ describe("DailyEntryForm", () => {
       expect(rpc).toHaveBeenCalledWith("save_daily_entry", { p_mood: 4, p_content: "hari ini baik" }),
     );
     expect(await screen.findByText("Catatan harian tersimpan.")).toBeInTheDocument();
-    expect(screen.getByLabelText(/jurnal/i)).toHaveValue("");
+    expect(screen.getByText("Baik")).toBeInTheDocument(); // ringkasan mood yang baru disimpan
     expect(onSaved).toHaveBeenCalled();
+    // Layar sukses menggantikan form; "Tulis catatan lagi" mengembalikan form yang sudah kosong
+    fireEvent.click(screen.getByRole("button", { name: /tulis catatan lagi/i }));
+    expect(screen.getByLabelText(/jurnal/i)).toHaveValue("");
+    expect(screen.getByRole("radio", { name: /mood 4/i })).toHaveAttribute("aria-checked", "false");
   });
 
   it("menampilkan rujukan krisis hanya bila jurnal berisi ungkapan menyakiti diri", async () => {
