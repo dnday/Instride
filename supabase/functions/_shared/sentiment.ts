@@ -40,3 +40,19 @@ export function pickTopLabel(response: unknown): string | null {
   const top = list.reduce((a, b) => (b?.score > a?.score ? b : a));
   return typeof top?.label === "string" ? top.label : null;
 }
+
+/** Ambil isi `data` dari event "complete" pada respons SSE API Gradio; null bila error/tidak ada. */
+export function parseGradioSse(body: string): unknown | null {
+  const lines = body.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() !== "event: complete") continue;
+    const data = lines.slice(i + 1).find((l) => l.startsWith("data:"));
+    if (!data) return null;
+    try {
+      return JSON.parse(data.slice(5).trim());
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
