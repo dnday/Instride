@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Fraunces } from "next/font/google";
 import "./globals.css";
@@ -15,10 +15,18 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const description = "Pantau wellbeing mahasiswa dengan mood tracker, jurnal, dan analisis sentimen AI.";
+const base = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://dnday.github.io"),
   title: "Instride",
-  description: "Pantau wellbeing mahasiswa dengan mood tracker, jurnal, dan analisis sentimen AI.",
+  description,
+  openGraph: { title: "Instride", description, type: "website", locale: "id_ID", images: [`${base}/share.jpg`] },
+  twitter: { card: "summary_large_image", title: "Instride", description, images: [`${base}/share.jpg`] },
 };
+
+export const viewport: Viewport = { themeColor: "#2A7470" };
 
 export default function RootLayout({
   children,
