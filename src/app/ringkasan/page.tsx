@@ -140,7 +140,7 @@ export default function PersonalDashboard() {
                       </div>
                       <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface" aria-hidden="true">
                         <div
-                          className="h-full rounded-full transition-[width] duration-500 ease-out"
+                          className="bar-grow h-full rounded-full"
                           style={{
                             width: `${(c.count / total) * 100}%`,
                             background: c.sentiment === "Positif" ? "#2A7470" : c.sentiment === "Netral" ? "#9AA5A2" : "#B4533A",

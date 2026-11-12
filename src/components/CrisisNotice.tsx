@@ -5,7 +5,7 @@ import { CRISIS_CONTACTS } from "@/lib/crisis";
 /** Kartu rujukan bantuan (pedoman pesan aman: tenang, tanpa menghakimi, langsung berisi kontak). */
 export function CrisisNotice() {
   return (
-    <div role="alert" className="mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-ink">
+    <div role="alert" className="pop-in mt-4 rounded-2xl border border-orange-200 bg-orange-50 p-4 text-sm text-ink">
       <p className="font-semibold">Terima kasih sudah menuliskannya. Kamu tidak harus menghadapinya sendirian.</p>
       <p className="mt-1">
         Kalau kamu sedang berpikir untuk menyakiti diri, bicarakan sekarang dengan orang yang bisa membantu. Layanan

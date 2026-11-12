@@ -98,7 +98,7 @@ export default function DailyEntryForm({
       <p className="mt-1 text-sm text-muted">Pilih mood, lalu tulis jurnal bila ingin (opsional). Tidak ada jawaban yang salah.</p>
 
       {savedNow && (
-        <p className="mt-3 flex items-center gap-3 rounded-xl bg-brand-50 p-3 text-sm font-medium text-brand-900" role="status">
+        <p className="pop-in mt-3 flex items-center gap-3 rounded-xl bg-brand-50 p-3 text-sm font-medium text-brand-900" role="status">
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7 shrink-0">
             <circle cx="12" cy="12" r="11" fill="#2A7470" />
             <path className="check-draw" d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -116,7 +116,7 @@ export default function DailyEntryForm({
         </p>
       )}
       {formError && (
-        <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">
+        <p className="pop-in mt-3 rounded-xl bg-red-50 p-3 text-sm text-red-800" role="alert">
           {formError}
         </p>
       )}
