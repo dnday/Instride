@@ -11,17 +11,28 @@ const CORS = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
+// Prioritas: API model sendiri (Hugging Face Space menjalankan mnrsu/instride), lalu HF Inference, lalu kamus kata.
+// HF Inference gratis tidak melayani model unggahan sendiri, jadi model hasil fine-tuning butuh SENTIMENT_URL.
+const SENTIMENT_URL = Deno.env.get("SENTIMENT_URL");
+const SENTIMENT_KEY = Deno.env.get("SENTIMENT_KEY");
 const HF_TOKEN = Deno.env.get("HF_TOKEN");
 const MODEL = Deno.env.get("HF_MODEL") ?? DEFAULT_MODEL;
 
+const endpoint = SENTIMENT_URL && SENTIMENT_KEY
+  ? { url: SENTIMENT_URL, key: SENTIMENT_KEY }
+  : HF_TOKEN
+    ? { url: `https://router.huggingface.co/hf-inference/models/${MODEL}`, key: HF_TOKEN }
+    : null;
+
 async function classify(text: string): Promise<{ sentiment: Sentiment; source: "indobert" | "kamus" }> {
-  if (HF_TOKEN) {
+  if (endpoint) {
     try {
-      const res = await fetch(`https://router.huggingface.co/hf-inference/models/${MODEL}`, {
+      // Timeout 25 detik: Space gratis bisa "bangun tidur" dulu saat lama tidak dipakai
+      const res = await fetch(endpoint.url, {
         method: "POST",
-        headers: { Authorization: `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${endpoint.key}`, "Content-Type": "application/json" },
         body: JSON.stringify({ inputs: text.slice(0, 2000) }),
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(25000),
       });
       if (res.ok) {
         const label = pickTopLabel(await res.json());
