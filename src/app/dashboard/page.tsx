@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { currentUser, loadProfile } from "@/lib/session";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import DailyEntryForm from "./DailyEntryForm";
 import { Loading, StudentNav } from "@/components/StudentShell";
@@ -42,29 +43,26 @@ export default function DashboardPage() {
     }
 
     (async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      if (!auth.user) {
+      const user = await currentUser(supabase);
+      if (!user) {
         router.replace("/login");
         return;
       }
-      // Konselor/admin salah halaman: arahkan ke campus dashboard.
-      const { data: me } = await supabase
-        .from("users")
-        .select("role, name")
-        .eq("user_id", auth.user.id)
-        .single();
-      if (me?.role === "konselor" || me?.role === "admin") {
-        router.replace("/campus-dashboard");
-        return;
-      }
+      // Profil (ter-cache) dan status hari ini diambil bersamaan, bukan berurutan
       const { startIso, endIso } = todayRange();
-      const [moodRes, journalRes] = await Promise.all([
+      const [me, moodRes, journalRes] = await Promise.all([
+        loadProfile(supabase, user.id),
         supabase.from("moods").select("mood_id").gte("recorded_at", startIso).lt("recorded_at", endIso).limit(1),
         supabase.from("journals").select("journal_id").gte("created_at", startIso).lt("created_at", endIso).limit(1),
       ]);
+      // Konselor/admin salah halaman: arahkan ke campus dashboard.
+      if (me.role === "konselor" || me.role === "admin") {
+        router.replace("/campus-dashboard");
+        return;
+      }
       setState({
         status: "ready",
-        name: (me?.name as string | undefined)?.split(" ")[0] ?? "",
+        name: me.name?.split(" ")[0] ?? "",
         // Jurnal lama bisa tersimpan tanpa mood, jadi keduanya tetap dicek
         alreadyToday: (moodRes.data?.length ?? 0) > 0 || (journalRes.data?.length ?? 0) > 0,
         // Jangan diam-diam menganggap belum ada entri kalau pengecekan gagal

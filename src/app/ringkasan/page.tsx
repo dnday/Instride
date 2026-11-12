@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import dynamic from "next/dynamic";
 
 import { MoodFace } from "@/components/MoodFace";
-import { analyzePending, ErrorNote, Loading, loadHistory, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
+import { ErrorNote, Loading, loadWithBackgroundAnalysis, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
 import { type DayEntry, mergeEntries, monthGrid, streak, trendSeries, weeklySummary } from "@/lib/history";
 import { MOOD_COLORS, MOOD_LABELS, moodColor } from "@/lib/mood";
+
+// Recharts (~100 KB) dimuat setelah halaman tampil, supaya ringkasan & kalender tidak menunggu grafik
+const MoodTrendChart = dynamic(() => import("@/components/MoodTrendChart"), {
+  ssr: false,
+  loading: () => <div className="h-full animate-pulse rounded-xl bg-surface motion-reduce:animate-none" aria-hidden="true" />,
+});
 
 const WEEKDAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
 const fmtNum = (n: number) => n.toLocaleString("id-ID", { maximumFractionDigits: 1 });
@@ -21,12 +27,10 @@ export default function PersonalDashboard() {
 
   useEffect(() => {
     if (auth.status !== "ready") return;
-    (async () => {
-      await analyzePending(auth.supabase);
-      const r = await loadHistory(auth.supabase);
-      if (r.error) setError("Data gagal dimuat. Periksa koneksi lalu muat ulang halaman.");
+    return loadWithBackgroundAnalysis(auth.supabase, (r) => {
+      setError(r.error ? "Data gagal dimuat. Periksa koneksi lalu muat ulang halaman." : null);
       setEntries(mergeEntries(r.moods, r.journals));
-    })();
+    });
   }, [auth]);
 
   const summary = useMemo(() => entries && weeklySummary(entries), [entries]);
@@ -171,21 +175,7 @@ export default function PersonalDashboard() {
             </div>
             <div className="mt-4 h-64" role="img"
               aria-label={`Grafik mood: ${series.filter((s) => s.mood != null).map((s) => `${s.label} ${s.mood}`).join(", ") || "belum ada data"}`}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={series} margin={{ top: 8, right: 24, bottom: 0, left: -24 }}>
-                  <CartesianGrid stroke="#E6F2F1" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#56625F" }} tickLine={false} axisLine={false}
-                    interval={range === 7 ? 0 : "preserveStartEnd"} />
-                  <YAxis domain={[1, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 12, fill: "#56625F" }} tickLine={false} axisLine={false} />
-                  <Tooltip formatter={(v) => [`${v} / 5`, "Mood"]} contentStyle={{ borderRadius: 12, borderColor: "#CFE9E6" }} />
-                  <Line type="monotone" dataKey="mood" stroke="#2A7470" strokeWidth={2.5}
-                    dot={(p: { cx?: number; cy?: number; payload?: { mood: number | null; date: string } }) =>
-                      p.payload?.mood == null || p.cx == null || p.cy == null ? <g key={p.payload?.date} /> : (
-                        <circle key={p.payload.date} cx={p.cx} cy={p.cy} r={5} fill={moodColor(p.payload.mood).fill} stroke="#fff" strokeWidth={2} />
-                      )}
-                    activeDot={{ r: 6 }} connectNulls isAnimationActive={false} />
-                </LineChart>
-              </ResponsiveContainer>
+              <MoodTrendChart series={series} range={range} />
             </div>
           </section>
         </>

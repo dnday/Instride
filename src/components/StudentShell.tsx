@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { CAMPUS_DESTINATION } from "@/lib/constants";
+import { clearProfileCache, currentUser, loadProfile } from "@/lib/session";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 const NAV = [
@@ -32,11 +33,11 @@ export function useStudent(): AuthState {
       return;
     }
     (async () => {
-      const { data } = await supabase.auth.getUser();
-      if (!data.user) return router.replace("/login");
-      const { data: me } = await supabase.from("users").select("role").eq("user_id", data.user.id).single();
-      if (me?.role === "konselor" || me?.role === "admin") return router.replace(CAMPUS_DESTINATION);
-      setState({ status: "ready", supabase, user: data.user });
+      const user = await currentUser(supabase);
+      if (!user) return router.replace("/login");
+      const me = await loadProfile(supabase, user.id);
+      if (me.role === "konselor" || me.role === "admin") return router.replace(CAMPUS_DESTINATION);
+      setState({ status: "ready", supabase, user });
     })();
   }, [router]);
   return state;
@@ -47,6 +48,7 @@ export function StudentNav() {
   const router = useRouter();
   async function logout() {
     try {
+      clearProfileCache();
       await getSupabaseClient().auth.signOut();
     } finally {
       router.replace("/login");
@@ -153,13 +155,34 @@ export function SentimentBadge({ sentiment }: { sentiment: string | null }) {
   );
 }
 
-/** Jalankan analisis sentimen untuk jurnal yang belum dianalisis (abaikan kegagalan; tampil "Menunggu analisis"). */
-export async function analyzePending(supabase: SupabaseClient) {
+/** Analisis sentimen jurnal yang belum berlabel. Dipanggil di latar belakang (jangan di-await sebelum data
+ *  ditampilkan): bila Space sedang tidur, panggilan ini bisa butuh puluhan detik.
+ *  Mengembalikan jumlah jurnal yang baru dianalisis (0 bila gagal / tidak ada). */
+export async function analyzePending(supabase: SupabaseClient): Promise<number> {
   try {
-    await supabase.functions.invoke("analyze-sentiment", { body: {} });
+    const { data } = await supabase.functions.invoke("analyze-sentiment", { body: {} });
+    return Number((data as { analyzed?: number } | null)?.analyzed ?? 0);
   } catch {
-    /* Edge Function belum ter-deploy / offline */
+    return 0; /* Edge Function belum ter-deploy / offline */
   }
+}
+
+/** Muat riwayat sekarang juga, lalu muat ulang diam-diam bila analisis latar belakang menghasilkan label baru. */
+export function loadWithBackgroundAnalysis(
+  supabase: SupabaseClient,
+  onData: (r: Awaited<ReturnType<typeof loadHistory>>) => void,
+) {
+  let alive = true;
+  loadHistory(supabase).then((r) => alive && onData(r));
+  analyzePending(supabase).then(async (n) => {
+    if (n > 0 && alive) {
+      const r = await loadHistory(supabase);
+      if (alive) onData(r);
+    }
+  });
+  return () => {
+    alive = false;
+  };
 }
 
 /** Ambil mood + jurnal (dengan sentimen) milik user; RLS membatasi ke data sendiri. */

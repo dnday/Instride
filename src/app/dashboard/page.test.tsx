@@ -29,7 +29,7 @@ vi.mock("@/lib/supabaseClient", () => ({
   getSupabaseClient: () => {
     if (h.state.configThrows) throw new h.FakeConfigError("Konfigurasi Supabase tidak lengkap");
     return {
-      auth: { getUser: h.getUser },
+      auth: { getSession: async () => ({ data: { session: (await h.getUser()).data.user ? { user: (await h.getUser()).data.user } : null } }) },
       from: (table: string) =>
         table === "users"
           ? { select: () => ({ eq: () => ({ single: h.single }) }) }
@@ -40,6 +40,7 @@ vi.mock("@/lib/supabaseClient", () => ({
 }));
 
 beforeEach(() => {
+  sessionStorage.clear();
   replace.mockReset();
   h.state.configThrows = false;
   h.getUser.mockReset().mockResolvedValue({ data: { user: { id: "u1" } } });

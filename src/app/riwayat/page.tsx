@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
-import { analyzePending, ErrorNote, Loading, loadHistory, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
+import { ErrorNote, Loading, loadWithBackgroundAnalysis, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
 import { MoodFace } from "@/components/MoodFace";
 import { type DayEntry, filterEntries, type HistoryFilter, mergeEntries, SENTIMENTS } from "@/lib/history";
 import { MOOD_LABELS } from "@/lib/mood";
@@ -37,12 +37,10 @@ export default function RiwayatPage() {
 
   useEffect(() => {
     if (auth.status !== "ready") return;
-    (async () => {
-      await analyzePending(auth.supabase);
-      const r = await loadHistory(auth.supabase);
-      if (r.error) setError("Riwayat gagal dimuat. Periksa koneksi lalu muat ulang halaman.");
+    return loadWithBackgroundAnalysis(auth.supabase, (r) => {
+      setError(r.error ? "Riwayat gagal dimuat. Periksa koneksi lalu muat ulang halaman." : null);
       setEntries(mergeEntries(r.moods, r.journals));
-    })();
+    });
   }, [auth]);
 
   const shown = useMemo(() => entries && filterEntries(entries, filter), [entries, filter]);
