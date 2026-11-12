@@ -6,7 +6,7 @@ import DashboardPage from "./page";
 const replace = vi.fn();
 const push = vi.fn();
 const router = { replace, push };
-vi.mock("next/navigation", () => ({ useRouter: () => router }));
+vi.mock("next/navigation", () => ({ useRouter: () => router, usePathname: () => "/dashboard" }));
 
 vi.mock("./MoodForm", () => ({ default: () => <div data-testid="mood-form" /> }));
 vi.mock("./JournalForm", () => ({ default: () => <div data-testid="journal-form" /> }));
