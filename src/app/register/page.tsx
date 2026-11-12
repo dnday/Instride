@@ -10,12 +10,17 @@ import { destinationForRole } from "@/lib/constants";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
+const CONSENT_REQUIRED = "Persetujuan pemrosesan data wajib dicentang untuk mendaftar";
+
 export default function RegisterPage() {
   const router = useRouter();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Persetujuan eksplisit: jurnal & mood termasuk data kesehatan (data pribadi spesifik, UU 27/2022)
+  const [consent, setConsent] = useState(false);
+  const [consentError, setConsentError] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -30,7 +35,8 @@ export default function RegisterPage() {
     // 1. Validate
     const result = validateRegister({ name, email, password });
     setFieldErrors(result.errors);
-    if (!result.ok) return;
+    setConsentError(consent ? null : CONSENT_REQUIRED);
+    if (!result.ok || !consent) return;
 
     // 2. Loading
     setLoading(true);
@@ -52,7 +58,7 @@ export default function RegisterPage() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { name: name.trim() } },
+        options: { data: { name: name.trim(), consent_at: new Date().toISOString() } },
       });
 
       if (signUpError) {
@@ -116,7 +122,42 @@ export default function RegisterPage() {
           </div>
         )}
 
-        <GoogleSignInButton label="Daftar dengan Google" />
+        <div className="mb-6 rounded-md border border-gray-200 bg-gray-50 p-3">
+          <label className="flex items-start gap-3 text-sm text-gray-700">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => {
+                setConsent(e.target.checked);
+                if (e.target.checked) setConsentError(null);
+              }}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-[#2A7470]"
+              aria-invalid={consentError ? "true" : undefined}
+              aria-describedby={consentError ? "consent-error" : undefined}
+            />
+            <span>
+              Saya menyetujui mood dan jurnal saya diproses untuk analisis sentimen dan statistik kampus yang anonim,
+              sesuai{" "}
+              <Link href="/privasi" className="font-semibold text-[#2A7470] underline">
+                Kebijakan Privasi
+              </Link>
+              .
+            </span>
+          </label>
+          {consentError && (
+            <p id="consent-error" className="mt-2 text-xs text-red-600" role="alert">
+              {consentError}
+            </p>
+          )}
+        </div>
+
+        {consent ? (
+          <GoogleSignInButton label="Daftar dengan Google" />
+        ) : (
+          <p className="rounded-md border border-dashed border-gray-300 py-2.5 text-center text-sm text-gray-500">
+            Centang persetujuan di atas untuk daftar dengan Google
+          </p>
+        )}
         <div className="my-6 flex items-center gap-3 text-xs text-gray-500">
           <span className="h-px flex-1 bg-gray-200" />
           atau dengan email

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
 import { ErrorNote, Loading, type Session, StudentPage, useStudent } from "@/components/StudentShell";
@@ -136,8 +138,83 @@ function Settings({ supabase, user }: Session) {
           </div>
           <FormNote id="reminder-note" note={reminderNote} />
         </section>
+
+        <DataSection supabase={supabase} user={user} />
       </div>
     </div>
+  );
+}
+
+/** Hak penghapusan data (UU 27/2022): konfirmasi dua langkah di halaman, tanpa dialog browser. */
+function DataSection({ supabase, user }: Session) {
+  const router = useRouter();
+  const [confirming, setConfirming] = useState<"entries" | "account" | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<Note>(null);
+
+  async function run() {
+    setBusy(true);
+    setNote(null);
+    try {
+      if (confirming === "entries") {
+        // RLS hanya mengizinkan menghapus baris milik sendiri; sentimen ikut terhapus (ON DELETE CASCADE)
+        const [m, j] = await Promise.all([
+          supabase.from("moods").delete().eq("user_id", user.id),
+          supabase.from("journals").delete().eq("user_id", user.id),
+        ]);
+        if (m.error || j.error) throw new Error();
+        setNote({ ok: true, text: "Semua mood dan jurnalmu sudah dihapus." });
+      } else {
+        const { error } = await supabase.functions.invoke("delete-account", { body: {} });
+        if (error) throw error;
+        await supabase.auth.signOut();
+        router.replace("/");
+        return;
+      }
+      setConfirming(null);
+    } catch {
+      setNote({ ok: false, text: "Penghapusan gagal. Periksa koneksi lalu coba lagi." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="card">
+      <h2 className="font-semibold text-ink">Data saya</h2>
+      <p className="mt-1 text-sm text-ink">
+        Kamu bisa menghapus data kapan saja. Penghapusan bersifat permanen dan tidak bisa dibatalkan. Lihat{" "}
+        <Link href="/privasi" className="font-semibold text-brand-700 underline">Kebijakan Privasi</Link>.
+      </p>
+      {confirming ? (
+        <div role="alert" className="mt-4 rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-ink">
+          <p className="font-semibold">
+            {confirming === "entries"
+              ? "Hapus semua mood, jurnal, dan hasil analisisnya?"
+              : "Hapus akun beserta semua mood dan jurnal?"}
+          </p>
+          <p className="mt-1">Tindakan ini permanen.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" className="btn bg-negative hover:bg-negative" disabled={busy} onClick={run}>
+              {busy ? "Menghapus..." : "Ya, hapus permanen"}
+            </button>
+            <button type="button" className="btn-ghost" disabled={busy} onClick={() => setConfirming(null)}>
+              Batal
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="button" className="btn-ghost" onClick={() => setConfirming("entries")}>
+            Hapus semua catatan
+          </button>
+          <button type="button" className="btn-ghost text-negative border-negative" onClick={() => setConfirming("account")}>
+            Hapus akun
+          </button>
+        </div>
+      )}
+      <FormNote id="data-note" note={note} />
+    </section>
   );
 }
 
