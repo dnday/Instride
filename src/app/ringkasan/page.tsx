@@ -64,7 +64,7 @@ export default function PersonalDashboard() {
               <div className="mt-4 h-64" role="img"
                 aria-label={`Grafik mood: ${series.filter((s) => s.mood != null).map((s) => `${s.label} ${s.mood}`).join(", ") || "belum ada data"}`}>
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={series} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
+                  <LineChart data={series} margin={{ top: 8, right: 24, bottom: 0, left: -24 }}>
                     <CartesianGrid stroke="#E6F2F1" vertical={false} />
                     <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#56625F" }} tickLine={false} axisLine={false}
                       interval={range === 7 ? 0 : "preserveStartEnd"} />
