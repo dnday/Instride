@@ -30,9 +30,9 @@ node ml/eval_lexicon.mjs                        # evaluasi fallback kamus kata
 
 Model sudah diunggah ke [mnrsu/instride](https://huggingface.co/mnrsu/instride). HF Inference gratis tidak melayani
 model unggahan sendiri (`Model not supported by provider hf-inference`), jadi model dijalankan di Hugging Face Space
-(CPU gratis) dari folder `ml/space/`: API FastAPI berkunci yang mengembalikan format sama dengan HF Inference.
+(SDK Gradio, CPU gratis) dari folder `ml/space/`: API berkunci (FastAPI di dalam app Gradio, halaman uji di `/ui`) yang mengembalikan format sama dengan HF Inference.
 
-1. Buat Space Docker dari `ml/space/` dan isi secret Space `API_KEY` dengan string acak.
+1. Buat Space Gradio (template Blank) dan unggah `app.py`, `requirements.txt`, `README.md` dari `ml/space/`, dan isi secret Space `API_KEY` dengan string acak.
 2. Di repo GitHub: variable `SENTIMENT_URL` = URL Space (mis. `https://mnrsu-instride-sentiment.hf.space/`),
    secret `SENTIMENT_KEY` = nilai `API_KEY` yang sama.
 3. CI meneruskan keduanya ke secret Supabase saat deploy Edge Function.
