@@ -28,6 +28,14 @@ node ml/eval_lexicon.mjs                        # evaluasi fallback kamus kata
 
 ## Memakai model ini di aplikasi
 
-Edge Function `analyze-sentiment` memanggil Hugging Face Inference. Unggah `ml/model/` ke Hugging Face Hub,
-lalu isi variable repo `HF_MODEL` dengan nama modelnya dan secret `HF_TOKEN` dengan token akun tersebut.
-Label model (`positive`/`neutral`/`negative`) sudah dikenali `labelToSentiment`.
+Model sudah diunggah ke [mnrsu/instride](https://huggingface.co/mnrsu/instride). HF Inference gratis tidak melayani
+model unggahan sendiri (`Model not supported by provider hf-inference`), jadi model dijalankan di Hugging Face Space
+(CPU gratis) dari folder `ml/space/`: API FastAPI berkunci yang mengembalikan format sama dengan HF Inference.
+
+1. Buat Space Docker dari `ml/space/` dan isi secret Space `API_KEY` dengan string acak.
+2. Di repo GitHub: variable `SENTIMENT_URL` = URL Space (mis. `https://mnrsu-instride-sentiment.hf.space/`),
+   secret `SENTIMENT_KEY` = nilai `API_KEY` yang sama.
+3. CI meneruskan keduanya ke secret Supabase saat deploy Edge Function.
+
+Space gratis tidur setelah lama tidak dipakai; permintaan pertama bisa lambat dan jatuh ke kamus kata,
+lalu jurnal berikutnya dianalisis IndoBERT.
