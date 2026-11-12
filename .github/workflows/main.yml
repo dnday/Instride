@@ -84,6 +84,20 @@ jobs:
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push --remote --yes
 
+      # Analisis sentimen (IndoBERT via Hugging Face + fallback kamus kata). HF_TOKEN opsional:
+      # tanpa token, function tetap jalan memakai fallback kamus kata.
+      - name: Deploy Edge Function analyze-sentiment
+        if: env.SUPABASE_ACCESS_TOKEN != ''
+        # Gagal deploy function tidak boleh menahan rilis halaman; app tetap jalan (sentimen tampil "Menunggu analisis")
+        continue-on-error: true
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_MODEL: ${{ vars.HF_MODEL }}
+        run: |
+          if [ -n "$HF_TOKEN" ]; then supabase secrets set HF_TOKEN="$HF_TOKEN" --project-ref "$SUPABASE_PROJECT_REF"; fi
+          if [ -n "$HF_MODEL" ]; then supabase secrets set HF_MODEL="$HF_MODEL" --project-ref "$SUPABASE_PROJECT_REF"; fi
+          supabase functions deploy analyze-sentiment --project-ref "$SUPABASE_PROJECT_REF" --use-api
+
   deploy:
     if: github.event_name != 'pull_request'
     needs: [build, migrate]

@@ -20,3 +20,24 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
+/* Satu sistem komponen (acuan taste-skill: satu gaya kartu & tombol, hover/press, target sentuh 44px) */
+@layer components {
+  .card {
+    @apply bg-white rounded-2xl border border-brand-100 p-5 sm:p-6;
+  }
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-700 px-5 text-sm font-semibold text-white
+      transition hover:-translate-y-px hover:bg-brand-900 active:translate-y-0 active:scale-[0.98]
+      disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none;
+  }
+  .btn-ghost {
+    @apply btn bg-white text-brand-900 border border-brand-100 hover:bg-brand-50;
+  }
+  .field {
+    @apply min-h-11 w-full rounded-xl border border-brand-100 bg-white px-3 text-sm text-ink;
+  }
+  .label {
+    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-muted;
+  }
+}
