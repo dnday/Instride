@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { HeroBackdrop, Parallax } from "@/components/Parallax";
+
 const campusSees = ["Rata-rata mood mingguan seluruh kampus", "Persentase sentimen positif, netral, dan negatif", "Jumlah mahasiswa aktif per minggu"];
 const campusNeverSees = ["Nama, email, atau identitasmu", "Isi jurnal pribadimu", "Data minggu dengan kurang dari 10 mahasiswa"];
 
@@ -120,7 +122,8 @@ export default function Home() {
 
       <main id="konten">
         {/* Hero: sendirian di layar pertama */}
-        <section data-enter className="hero-enter -mt-16 min-h-svh flex flex-col justify-center pt-28 pb-12">
+        <section data-enter className="hero-enter relative isolate -mt-16 min-h-svh flex flex-col justify-center overflow-hidden pt-28 pb-12">
+          <HeroBackdrop />
           <div className="wrap grid gap-x-6 gap-y-12 lg:grid-cols-12 items-start">
             <div className="hero-text min-w-0 lg:col-span-6">
               <h1 className="font-serif text-[2rem] sm:text-5xl lg:text-[3.5rem] font-semibold leading-tight text-ink text-balance">
@@ -138,8 +141,9 @@ export default function Home() {
             </div>
 
             {/* Tampilan aplikasi yang sebenarnya: form mood + tren */}
+            <Parallax speed={-0.35} className="min-w-0 lg:col-span-6">
             <div role="img" data-ui aria-label="Tampilan aplikasi Instride: form mood harian dengan mood 4 terpilih dan grafik tren mood 7 hari"
-              className="min-w-0 lg:col-span-6 bg-white rounded-3xl border border-brand-100 shadow-xl shadow-brand-900/10 p-5 sm:p-8">
+              className="bg-white/90 backdrop-blur rounded-3xl border border-brand-100 shadow-xl shadow-brand-900/10 p-5 sm:p-8">
               <p className="text-sm font-medium text-muted">Hari ini</p>
               <p className="mt-1 font-serif text-2xl text-ink">Bagaimana perasaanmu hari ini?</p>
               <div className="mt-6"><MoodRow active={4} /></div>
@@ -155,6 +159,7 @@ export default function Home() {
                 Jurnalmu hanya untukmu
               </p>
             </div>
+            </Parallax>
           </div>
         </section>
 

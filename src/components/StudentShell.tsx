@@ -1,11 +1,13 @@
 "use client";
 
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { m } from "framer-motion";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { CAMPUS_DESTINATION } from "@/lib/constants";
+import { springSoft } from "@/components/Motion";
 import { clearProfileCache, currentUser, loadProfile } from "@/lib/session";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
@@ -61,16 +63,19 @@ export function StudentNav() {
         <div className="max-w-5xl mx-auto px-4 sm:px-8 h-16 flex items-center gap-6">
           <Link href="/" className="inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
           <nav aria-label="Navigasi mahasiswa" className="hidden sm:block flex-1">
-            <ul className="flex gap-1">
+            <ul className="isolate flex gap-1">
               {NAV.map((n) => (
                 <li key={n.href}>
                   <Link
                     href={n.href}
                     aria-current={isActive(n.href) ? "page" : undefined}
-                    className={`inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors ${
-                      isActive(n.href) ? "bg-brand-50 text-brand-900" : "text-ink hover:bg-brand-50"
+                    className={`relative inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-3 text-sm font-medium transition-colors duration-150 ${
+                      isActive(n.href) ? "text-brand-900" : "text-ink hover:text-brand-700"
                     }`}
                   >
+                    {isActive(n.href) && (
+                      <m.span layoutId="nav-pill" transition={springSoft} aria-hidden="true" className="absolute inset-0 -z-10 rounded-full bg-brand-50" />
+                    )}
                     {n.label}
                   </Link>
                 </li>
@@ -85,16 +90,19 @@ export function StudentNav() {
 
       {/* Ponsel: tab bawah seperti aplikasi, mudah dijangkau jempol */}
       <nav aria-label="Navigasi mahasiswa (ponsel)" className="sm:hidden fixed inset-x-0 bottom-0 z-30 border-t border-brand-100 bg-white/95 backdrop-blur pb-[env(safe-area-inset-bottom)]">
-        <ul className="grid grid-cols-5">
+        <ul className="isolate grid grid-cols-5">
           {NAV.map((n) => (
             <li key={n.href}>
               <Link
                 href={n.href}
                 aria-current={isActive(n.href) ? "page" : undefined}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium ${
-                  isActive(n.href) ? "text-brand-700" : "text-muted"
+                className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium transition-colors duration-150 ${
+                  isActive(n.href) ? "text-brand-900" : "text-muted"
                 }`}
               >
+                {isActive(n.href) && (
+                  <m.span layoutId="tab-pill" transition={springSoft} aria-hidden="true" className="absolute inset-x-2 top-1.5 bottom-1.5 -z-10 rounded-2xl bg-brand-50" />
+                )}
                 <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor"
                   strokeWidth={isActive(n.href) ? 2.2 : 1.8} strokeLinecap="round" strokeLinejoin="round">
                   <path d={n.icon} />
@@ -111,16 +119,13 @@ export function StudentNav() {
 
 export function StudentPage({ title, intro, children }: { title: string; intro?: string; children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-surface">
-      <StudentNav />
-      <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
-        <div className="page-enter">
-          <h1 className="font-serif text-3xl font-semibold text-ink">{title}</h1>
-          {intro && <p className="mt-1 text-muted">{intro}</p>}
-        </div>
-        {children}
-      </main>
-    </div>
+    <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
+      <div>
+        <h1 className="font-serif text-3xl font-semibold text-ink">{title}</h1>
+        {intro && <p className="mt-1 text-muted">{intro}</p>}
+      </div>
+      {children}
+    </main>
   );
 }
 

@@ -1,10 +1,12 @@
 "use client";
 
+import { AnimatePresence, m } from "framer-motion";
 import Link from "next/link";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { ErrorNote, Loading, loadWithBackgroundAnalysis, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
 import { MoodFace } from "@/components/MoodFace";
+import { enterEase, springSoft } from "@/components/Motion";
 import { type DayEntry, filterEntries, type HistoryFilter, mergeEntries, SENTIMENTS } from "@/lib/history";
 import { MOOD_LABELS } from "@/lib/mood";
 
@@ -107,8 +109,16 @@ export default function RiwayatPage() {
       ) : (
         <ul className="space-y-3">
           {deleteError && <ErrorNote message={deleteError} />}
-          {shown.map((e) => (
-            <li key={e.date} className="card">
+          <AnimatePresence initial={false}>
+          {shown.map((e, i) => (
+            <m.li
+              key={e.date}
+              layout="position"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0, transition: { duration: 0.35, ease: enterEase, delay: Math.min(i, 6) * 0.04 } }}
+              exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.15 } }}
+              className="card"
+            >
               <div className="flex flex-wrap items-center gap-3">
                 {e.mood == null ? (
                   <span className="grid h-11 w-11 place-items-center rounded-full border-2 border-dashed border-brand-100 text-muted" aria-label="Tanpa mood">–</span>
@@ -128,8 +138,15 @@ export default function RiwayatPage() {
               </div>
               {e.journals.length > 0 && (
                 <ul className="mt-3 space-y-3">
+                  <AnimatePresence initial={false}>
                   {e.journals.map((j) => (
-                    <li key={j.id} className="rounded-xl bg-surface p-4">
+                    <m.li
+                      key={j.id}
+                      layout
+                      exit={{ opacity: 0, x: -24, transition: { duration: 0.18 } }}
+                      transition={springSoft}
+                      className="rounded-xl bg-surface p-4"
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <SentimentBadge sentiment={j.sentiment} />
                         {confirmId !== j.id && (
@@ -141,21 +158,34 @@ export default function RiwayatPage() {
                         )}
                       </div>
                       <p className="mt-2 whitespace-pre-line break-words text-ink leading-relaxed">{j.content}</p>
+                      <AnimatePresence initial={false}>
                       {confirmId === j.id && (
-                        <div role="alert" className="pop-in mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm">
+                        <m.div
+                          key="konfirmasi"
+                          role="alert"
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0, transition: { duration: 0.15 } }}
+                          className="overflow-hidden"
+                        >
+                        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm">
                           <span className="mr-auto font-medium text-ink">Hapus jurnal ini secara permanen?</span>
                           <button type="button" className="btn bg-negative hover:bg-negative" disabled={deleting} onClick={() => removeJournal(j.id)}>
                             {deleting ? "Menghapus..." : "Ya, hapus"}
                           </button>
                           <button type="button" className="btn-ghost" disabled={deleting} onClick={() => setConfirmId(null)}>Batal</button>
                         </div>
+                        </m.div>
                       )}
-                    </li>
+                      </AnimatePresence>
+                    </m.li>
                   ))}
+                  </AnimatePresence>
                 </ul>
               )}
-            </li>
+            </m.li>
           ))}
+          </AnimatePresence>
         </ul>
       )}
     </StudentPage>

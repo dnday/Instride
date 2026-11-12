@@ -1,6 +1,9 @@
 "use client";
 
+import { AnimatePresence, m } from "framer-motion";
 import { useEffect, useState } from "react";
+
+import { enterEase } from "./Motion";
 
 // ---------------------------------------------------------------------------------------------------
 // Latihan napas pelan: tarik 4 detik, hembuskan 6 detik = 6 napas per menit.
@@ -131,7 +134,14 @@ export function GroundingExercise() {
           <button type="button" className="btn-ghost mt-5" onClick={() => setStep(0)}>Ulangi</button>
         </div>
       ) : (
-        <div key={step} className="step-in mt-6">
+        <AnimatePresence mode="wait" initial={false}>
+        <m.div
+          key={step}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0, transition: { duration: 0.3, ease: enterEase } }}
+          exit={{ opacity: 0, x: -24, transition: { duration: 0.15 } }}
+          className="mt-6"
+        >
           <div className="flex items-center gap-4">
             <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -169,7 +179,8 @@ export function GroundingExercise() {
               </button>
             ))}
           </div>
-        </div>
+        </m.div>
+        </AnimatePresence>
       )}
     </section>
   );

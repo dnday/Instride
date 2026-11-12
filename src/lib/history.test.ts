@@ -117,3 +117,19 @@ describe("kalender & hari beruntun", () => {
     expect(streak(entries, new Date(2026, 10, 15))).toBe(0);
   });
 });
+
+describe("wawasan", () => {
+  it("hari terbaik & perubahan mingguan", async () => {
+    const { bestWeekday, weekDelta } = await import("./history");
+    const now = new Date(2026, 10, 12, 20);
+    // 10 Nov (Selasa) mood 3, 12 Nov (Kamis) mood 5
+    expect(bestWeekday(entries, now)).toMatchObject({ name: "Kamis", average: 5 });
+    expect(bestWeekday(entries.slice(0, 1), now)).toBeNull(); // butuh minimal 2 hari bermood
+    expect(weekDelta(entries, now)).toBeNull(); // minggu sebelumnya kosong
+    const more = mergeEntries(
+      [{ mood_value: 2, recorded_at: at(2026, 11, 3) }, { mood_value: 4, recorded_at: at(2026, 11, 12) }],
+      [],
+    );
+    expect(weekDelta(more, now)).toBe(2);
+  });
+});
