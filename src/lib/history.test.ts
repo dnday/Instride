@@ -1,5 +1,12 @@
 import { filterEntries, mergeEntries, trendSeries, weeklySummary } from "./history";
-import { labelToSentiment, lexiconSentiment, pickTopLabel } from "../../supabase/functions/_shared/sentiment";
+import {
+  buildLexicon,
+  labelToSentiment,
+  lexiconScore,
+  lexiconSentiment,
+  NEGATION_WINDOW,
+  pickTopLabel,
+} from "../../supabase/functions/_shared/sentiment";
 
 const at = (y: number, m: number, d: number, h = 9) => new Date(y, m - 1, d, h).toISOString();
 
@@ -44,11 +51,33 @@ describe("history", () => {
 });
 
 describe("sentimen", () => {
-  it("kamus kata dengan negasi", () => {
-    expect(lexiconSentiment("Hari ini aku senang dan lega")).toBe("Positif");
-    expect(lexiconSentiment("capek banget, stres sama tugas")).toBe("Negatif");
-    expect(lexiconSentiment("aku tidak senang hari ini")).toBe("Negatif");
-    expect(lexiconSentiment("kuliah jam tujuh")).toBe("Netral");
+  // Potongan kecil berformat InSet (word<TAB>weight); isi InSet asli dimuat dari repo sumbernya saat runtime
+  const tsv = (rows: [string, number][]) => ["word\tweight", ...rows.map(([w, n]) => `${w}\t${n}`)].join("\n");
+  const lex = buildLexicon(
+    tsv([["senang", 4], ["lega", 3], ["putus asa", -5], ["tidak", -5], ["kaget", 2]]),
+    tsv([["capek", -3], ["stres", -4], ["kaget", -3], ["batas (waktu)", -2]]),
+  );
+
+  it("leksikon InSet: jumlah bobot menentukan kelas", () => {
+    expect(lexiconScore("Hari ini aku senang dan lega", lex)).toBe(7);
+    expect(lexiconSentiment("Hari ini aku senang dan lega", lex)).toBe("Positif");
+    expect(lexiconSentiment("capek banget, stres sama tugas", lex)).toBe("Negatif");
+    expect(lexiconSentiment("kuliah jam tujuh", lex)).toBe("Netral");
+  });
+
+  it("frasa multi-kata, kata di dua daftar, dan kata ingkar", () => {
+    expect(lexiconScore("rasanya putus asa", lex)).toBe(-5); // frasa dicocokkan utuh
+    expect(lexiconScore("aku kaget", lex)).toBe(-1); // +2 dan -3 dijumlahkan
+    expect(lexiconScore("mendekati batas waktu", lex)).toBe(-2); // keterangan dalam kurung jadi bagian frasa
+    expect(lex.weights.has("tidak")).toBe(false); // kata ingkar tidak dihitung sebagai sentimen
+  });
+
+  it("negasi membalik polaritas dalam jendela 3 token", () => {
+    expect(NEGATION_WINDOW).toBe(3);
+    expect(lexiconSentiment("aku tidak senang hari ini", lex)).toBe("Negatif");
+    expect(lexiconScore("tidak terlalu begitu senang", lex)).toBe(-4); // token ke-3 setelah negasi
+    expect(lexiconScore("tidak ada yang bikin aku senang", lex)).toBe(4); // di luar jendela
+    expect(lexiconScore("nggak capek kok", lex)).toBe(3);
   });
 
   it("label model HF", () => {

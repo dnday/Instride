@@ -1,30 +1,33 @@
 {
+  "lexicon": "InSet (Koto & Rahmaningtyas, IALP 2017)",
+  "entries": 9053,
+  "negation_window": 3,
   "dataset": "SmSA (IndoNLU)",
   "test_size": 500,
   "test": {
     "positive": {
-      "precision": 0.8630952380952381,
-      "recall": 0.6971153846153846,
-      "f1-score": 0.7712765957446809,
+      "precision": 0.6395348837209303,
+      "recall": 0.5288461538461539,
+      "f1-score": 0.5789473684210525,
       "support": 208
     },
     "neutral": {
-      "precision": 0.35585585585585583,
-      "recall": 0.8977272727272727,
-      "f1-score": 0.5096774193548387,
+      "precision": 0.24,
+      "recall": 0.06818181818181818,
+      "f1-score": 0.10619469026548671,
       "support": 88
     },
     "negative": {
-      "precision": 0.9636363636363636,
-      "recall": 0.5196078431372549,
-      "f1-score": 0.6751592356687898,
+      "precision": 0.528052805280528,
+      "recall": 0.7843137254901961,
+      "f1-score": 0.6311637080867849,
       "support": 204
     },
-    "accuracy": 0.66,
+    "accuracy": 0.552,
     "macro avg": {
-      "precision": 0.7275291525291525,
-      "recall": 0.7048168334933042,
-      "f1-score": 0.6520377502561031
+      "precision": 0.4691958963338194,
+      "recall": 0.460447232506056,
+      "f1-score": 0.4387685889244414
     }
   }
 }

@@ -32,6 +32,7 @@ Dasar pemilihan 10:
 | --- | --- |
 | Mood harian memakai **satu butir skala 1–5**. | Ukuran satu butir lazim pada ecological momentary assessment (EMA) di aplikasi ponsel; tinjauan 2026 menemukan 74% instrumen stres EMA berupa satu butir. Namun versi singkat tidak otomatis mempertahankan sifat psikometrik instrumen aslinya, jadi skor ini **hanya untuk refleksi**, bukan skrining. |
 | Sentimen jurnal dari IndoBERT ditampilkan sebagai **positif/netral/negatif**, bukan label klinis. | Model dilatih pada SmSA (ulasan umum), bukan data klinis; akurasi uji 91,6% (lihat `ml/README.md`). |
+| Cadangan saat model tidak bisa dihubungi: leksikon **InSet** + negasi jendela 3 token. | Koto & Rahmaningtyas (2017); akurasi uji SmSA 55,2%. Setiap angka sentimen (hyperparameter, panjang input, aturan skor, jendela negasi) beserta sumbernya ada di `ml/README.md` bagian "Dasar setiap angka". |
 | Kandidat pengembangan: **WHO-5 Well-Being Index** versi Indonesia untuk penilaian mingguan. | Sudah divalidasi dalam bahasa Indonesia (Latifa dkk., JP3I 2023, dengan CFA dan IRT). Belum diimplementasikan. |
 
 ## 4. Rujukan krisis

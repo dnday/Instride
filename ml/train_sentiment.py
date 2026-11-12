@@ -35,10 +35,15 @@ def load(split: str) -> tuple[list[str], list[int]]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="indobenchmark/indobert-base-p1")
-    ap.add_argument("--epochs", type=int, default=3)
-    ap.add_argument("--batch", type=int, default=16)  # muat di GPU 4 GB dengan max_len 128 + AMP
-    ap.add_argument("--lr", type=float, default=2e-5)
-    ap.add_argument("--max-len", type=int, default=128)
+    # Sumber tiap nilai (lihat ml/README.md, bagian "Dasar hyperparameter"):
+    # [BERT] Devlin dkk. 2019, fine-tuning: lr {5e-5, 3e-5, 2e-5}, batch {16, 32}, epoch {2, 3, 4}.
+    # [BERT-code] google-research/bert run_classifier.py & optimization.py: max_seq_length 128,
+    #             warmup_proportion 0.1, weight decay 0.01, clip gradient global norm 1.0.
+    # [IndoNLU] Wilie dkk. 2020: lr dalam [1e-5, 4e-5], batch 16, model terbaik dipilih dari skor validasi.
+    ap.add_argument("--epochs", type=int, default=3)  # [BERT]; epoch terbaik dipilih via validasi [IndoNLU]
+    ap.add_argument("--batch", type=int, default=16)  # [BERT] & [IndoNLU]
+    ap.add_argument("--lr", type=float, default=2e-5)  # [BERT], di dalam rentang [IndoNLU]
+    ap.add_argument("--max-len", type=int, default=128)  # [BERT-code]; mencakup ~100% dokumen SmSA (p95 = 79 token)
     args = ap.parse_args()
 
     torch.manual_seed(42)
@@ -64,9 +69,9 @@ def main() -> None:
         return DataLoader(range(len(texts)), batch_size=args.batch, shuffle=shuffle, collate_fn=collate)
 
     train, valid, test = loader("train", True), loader("valid", False), loader("test", False)
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)  # [BERT-code]
     steps = len(train) * args.epochs
-    sched = get_linear_schedule_with_warmup(opt, int(0.1 * steps), steps)
+    sched = get_linear_schedule_with_warmup(opt, int(0.1 * steps), steps)  # warmup 10% lalu linear decay [BERT-code]
     scaler = torch.amp.GradScaler(enabled=device == "cuda")
 
     @torch.no_grad()
@@ -92,7 +97,7 @@ def main() -> None:
             opt.zero_grad()
             scaler.scale(loss).backward()
             scaler.unscale_(opt)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # [BERT-code]
             scaler.step(opt)
             scaler.update()
             sched.step()
