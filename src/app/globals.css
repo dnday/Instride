@@ -16,13 +16,42 @@ body {
   outline-color: #ffffff;
 }
 
-/* Hero masuk sekali saat halaman dimuat */
+/* ---------- Gerak: semua animasi hanya aktif bila pengguna tidak memilih "reduce motion" ---------- */
 @keyframes enter {
   from { opacity: 0; transform: translateY(12px); }
 }
+@keyframes pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  100% { transform: scale(1.06); }
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes float {
+  50% { transform: translateY(-10px) scale(1.04); }
+}
+@keyframes cell-in {
+  from { opacity: 0; transform: scale(0.6); }
+}
 @media (prefers-reduced-motion: no-preference) {
+  /* Hero landing & isi halaman muncul bertahap */
   .hero-enter > * > * { animation: enter 0.5s ease-out both; }
   .hero-enter > * > *:nth-child(2) { animation-delay: 0.12s; }
+  .stagger > * { animation: enter 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+  .stagger > *:nth-child(2) { animation-delay: 0.06s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.12s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.18s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.24s; }
+  .stagger > *:nth-child(n + 6) { animation-delay: 0.3s; }
+  /* Wajah mood terpilih "meletup" */
+  .mood-pop { animation: pop 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both; }
+  /* Tanda centang tergambar */
+  .check-draw { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 0.45s 0.1s ease-out forwards; }
+  .blob { animation: float 9s ease-in-out infinite; }
+  .cell-in { animation: cell-in 0.4s ease-out both; }
+  .lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+  .lift:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -12px rgb(31 78 75 / 0.25); }
 }
 
 

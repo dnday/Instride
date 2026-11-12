@@ -9,15 +9,11 @@ import { validateMood } from "@/lib/moodValidation";
 import { getSupabaseClient } from "@/lib/supabaseClient";
 import { hasCrisisLanguage } from "@/lib/crisis";
 import { CrisisNotice } from "@/components/CrisisNotice";
+import { MoodFace } from "@/components/MoodFace";
+import { MOOD_COLORS, MOOD_LABELS } from "@/lib/mood";
+import { appendDictation, useDictation } from "@/lib/useDictation";
 
 const MOOD_OPTIONS = [1, 2, 3, 4, 5] as const;
-const MOOD_LABELS: Record<number, string> = {
-  1: "Sangat buruk",
-  2: "Buruk",
-  3: "Biasa",
-  4: "Baik",
-  5: "Sangat baik",
-};
 
 type FieldErrors = { mood?: string; content?: string };
 
@@ -42,10 +38,12 @@ export default function DailyEntryForm({
   const [needsHelp, setNeedsHelp] = useState(false);
 
   const over = isOverLimit(content);
+  const dictation = useDictation((spoken) => setContent((c) => appendDictation(c, spoken)));
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (submitting) return;
+    dictation.stop();
     setFormError(null);
     setSavedNow(false);
     setNeedsHelp(false);
@@ -100,8 +98,15 @@ export default function DailyEntryForm({
       <p className="mt-1 text-sm text-muted">Pilih mood, lalu tulis jurnal bila ingin (opsional). Tidak ada jawaban yang salah.</p>
 
       {savedNow && (
-        <p className="mt-3 rounded-xl bg-brand-50 p-3 text-sm text-brand-900" role="status">
-          Catatan harian tersimpan.
+        <p className="mt-3 flex items-center gap-3 rounded-xl bg-brand-50 p-3 text-sm font-medium text-brand-900" role="status">
+          <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7 shrink-0">
+            <circle cx="12" cy="12" r="11" fill="#2A7470" />
+            <path className="check-draw" d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>
+            <span className="block">Catatan harian tersimpan.</span>
+            <span className="block font-normal">Terima kasih sudah meluangkan waktu untuk dirimu.</span>
+          </span>
         </p>
       )}
       {needsHelp && <CrisisNotice />}
@@ -130,6 +135,7 @@ export default function DailyEntryForm({
           >
             {MOOD_OPTIONS.map((v) => {
               const active = mood === v;
+              const color = MOOD_COLORS[v];
               return (
                 <button
                   type="button"
@@ -139,12 +145,15 @@ export default function DailyEntryForm({
                   aria-label={`Mood ${v} - ${MOOD_LABELS[v]}`}
                   title={MOOD_LABELS[v]}
                   onClick={() => setMood(v)}
-                  className={`flex min-h-11 flex-col items-center gap-1.5 rounded-2xl border px-1 py-3 transition hover:-translate-y-px motion-reduce:transform-none ${
-                    active ? "border-brand-700 bg-brand-50 text-brand-900" : "border-transparent text-muted hover:bg-surface"
+                  style={active ? { borderColor: color.fill, background: color.tint } : undefined}
+                  className={`flex min-h-11 flex-col items-center gap-1.5 rounded-2xl border-2 px-1 py-3 transition hover:-translate-y-0.5 motion-reduce:transform-none ${
+                    active ? "text-ink" : "border-transparent text-muted hover:bg-surface"
                   }`}
                 >
-                  <MoodFace value={v} active={active} />
-                  <span className="text-center text-xs font-medium leading-tight">{MOOD_LABELS[v]}</span>
+                  <span key={active ? "on" : "off"} className={active ? "mood-pop" : ""}>
+                    <MoodFace value={v} active={active} className="h-10 w-10 sm:h-12 sm:w-12" />
+                  </span>
+                  <span className={`text-center text-xs leading-tight ${active ? "font-semibold" : "font-medium"}`}>{MOOD_LABELS[v]}</span>
                 </button>
               );
             })}
@@ -157,21 +166,54 @@ export default function DailyEntryForm({
         </fieldset>
 
         <div>
-          <label htmlFor="journal" className="block text-sm font-medium text-ink">
-            Jurnal <span className="font-normal text-muted">(opsional)</span>
-          </label>
+          <div className="flex items-center justify-between gap-3">
+            <label htmlFor="journal" className="block text-sm font-medium text-ink">
+              Jurnal <span className="font-normal text-muted">(opsional)</span>
+            </label>
+            {dictation.supported && (
+              <button
+                type="button"
+                onClick={dictation.toggle}
+                aria-pressed={dictation.listening}
+                className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition ${
+                  dictation.listening
+                    ? "border-negative bg-[#F6DED6] text-negative"
+                    : "border-brand-700 text-brand-900 hover:bg-brand-50"
+                }`}
+              >
+                <span className="relative grid h-5 w-5 place-items-center">
+                  {dictation.listening && <span className="absolute inset-0 rounded-full bg-negative/30 motion-safe:animate-ping" />}
+                  <svg viewBox="0 0 24 24" aria-hidden="true" className="relative h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <rect x="9" y="3" width="6" height="11" rx="3" />
+                    <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+                  </svg>
+                </span>
+                {dictation.listening ? "Berhenti" : "Dikte suara"}
+              </button>
+            )}
+          </div>
           <textarea
             id="journal"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             rows={6}
-            placeholder="Ceritakan harimu..."
+            placeholder={dictation.supported ? "Ceritakan harimu, atau tekan Dikte suara lalu bicara..." : "Ceritakan harimu..."}
             aria-invalid={fieldErrors.content ? "true" : undefined}
             aria-describedby={fieldErrors.content ? "journal-error" : undefined}
             className={`mt-1 w-full rounded-xl border bg-surface px-4 py-3 text-base leading-relaxed text-ink placeholder:text-muted ${
               fieldErrors.content || over ? "border-red-500" : "border-brand-100"
             }`}
           />
+          {dictation.listening && (
+            <p className="mt-1 text-sm text-negative" role="status" aria-live="polite">
+              Mendengarkan… {dictation.interim && <span className="italic text-muted">{dictation.interim}</span>}
+            </p>
+          )}
+          {dictation.error && (
+            <p className="mt-1 text-xs text-red-600" role="alert">
+              {dictation.error}
+            </p>
+          )}
           <div className="mt-1 flex items-center justify-between">
             {fieldErrors.content ? (
               <p id="journal-error" className="text-xs text-red-600" role="alert">
@@ -201,19 +243,5 @@ export default function DailyEntryForm({
         </button>
       </form>
     </section>
-  );
-}
-
-/** Wajah sederhana: lengkung mulut dari sedih (1) ke senang (5). */
-function MoodFace({ value, active }: { value: number; active: boolean }) {
-  const curve = (value - 3) * 2.2;
-  const ink = active ? "#1F4E4B" : "#56625F";
-  return (
-    <svg viewBox="0 0 32 32" aria-hidden="true" className="h-10 w-10 sm:h-12 sm:w-12">
-      <circle cx="16" cy="16" r="14" fill={active ? "#CFE9E6" : "#F8FAFA"} stroke={active ? "#2A7470" : "#9AA5A2"} strokeWidth="1.6" />
-      <circle cx="11.5" cy="13" r="1.6" fill={ink} />
-      <circle cx="20.5" cy="13" r="1.6" fill={ink} />
-      <path d={`M10 ${20 - curve / 2} Q16 ${20 + curve} 22 ${20 - curve / 2}`} fill="none" stroke={ink} strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
   );
 }
