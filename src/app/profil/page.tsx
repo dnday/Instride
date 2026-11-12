@@ -6,6 +6,7 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { ErrorNote, Loading, type Session, StudentPage, useStudent } from "@/components/StudentShell";
 import { MESSAGES, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/authValidation";
+import { clearProfileCache } from "@/lib/session";
 
 type Note = { ok: boolean; text: string } | null;
 
@@ -48,6 +49,7 @@ function Settings({ supabase, user }: Session) {
     const { error } = await supabase.from("users").update({ name: value }).eq("user_id", user.id);
     setBusy(null);
     if (error) return setNameNote({ ok: false, text: "Nama gagal disimpan. Coba lagi." });
+    clearProfileCache(); // sapaan di halaman Catatan memakai nama baru
     setSavedName(value);
     setName(value);
     setNameNote({ ok: true, text: "Nama tersimpan." });
@@ -167,6 +169,7 @@ function DataSection({ supabase, user }: Session) {
       } else {
         const { error } = await supabase.functions.invoke("delete-account", { body: {} });
         if (error) throw error;
+        clearProfileCache();
         await supabase.auth.signOut();
         router.replace("/");
         return;
