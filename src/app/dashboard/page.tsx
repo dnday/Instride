@@ -5,8 +5,7 @@ import { useEffect, useState } from "react";
 
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import DailyEntryForm from "./DailyEntryForm";
-
-const PRIMARY = "#4FA7A1";
+import { StudentNav } from "@/components/StudentShell";
 
 type State =
   | { status: "loading" }
@@ -70,9 +69,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFA] text-gray-900">
-      <header className="flex items-center justify-between px-4 sm:px-8 py-4 text-white" style={{ background: PRIMARY }}>
-        <h1 className="font-semibold">Instride</h1>
-      </header>
+      <StudentNav />
 
       <main className="max-w-2xl mx-auto p-4 sm:p-8 space-y-6">
         <h2 className="text-2xl font-semibold">Catatan Harian</h2>

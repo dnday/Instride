@@ -38,3 +38,8 @@ TODO.md
 Laporan_Mingguan.md
 Laporan_Mingguan.pdf
 generate_dashboard.mjs
+
+# ML (training sentimen): environment, dataset unduhan, dan bobot model tidak di-commit
+/ml/.venv/
+/ml/data/
+/ml/model/

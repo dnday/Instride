@@ -1,6 +1,6 @@
 # Instride
 
-## lagi mikir
+## Pantau Wellbeing-mu, Mulai dari Hari Ini
 
 **Project Senior Project TI**
 
@@ -74,3 +74,75 @@ Dengan pendekatan ini, mahasiswa mendapat ruang refleksi mandiri, sedangkan inst
 Instride menggabungkan pemantauan wellbeing personal, analisis AI berbahasa Indonesia, dan analitik agregat untuk kampus dalam satu alur. Nilai pembeda utamanya adalah dukungan pengambilan keputusan institusi yang tetap menjaga kerahasiaan data mahasiswa.
 
 > Instride merupakan alat bantu pemantauan dan refleksi awal, bukan pengganti diagnosis atau layanan psikolog profesional.
+
+## Modul 2: SDLC & Git
+
+### Metodologi SDLC
+
+**Metodologi:** Agile (Scrum)
+
+**Alasan:** Scrum dipilih karena Instride memiliki beberapa fitur yang dapat dikembangkan secara bertahap, kebutuhan pengguna (mahasiswa dan kampus) dapat memerlukan penyesuaian, serta pengembangan AI membutuhkan proses pengujian dan evaluasi berulang. Scrum memungkinkan tim mengembangkan produk dalam sprint, melakukan evaluasi secara berkala, dan menyesuaikan prioritas selama proyek berlangsung.
+
+### Tujuan Produk
+
+Instride bertujuan membantu mahasiswa memantau wellbeing secara personal melalui pencatatan mood dan jurnal harian serta analisis sentimen berbasis AI, sekaligus membantu unit konseling kampus memahami tren wellbeing mahasiswa secara agregat dan anonim sebagai dasar pengambilan keputusan dan dukungan yang lebih proaktif. Fitur inti (MVP) dipastikan berjalan solid terlebih dahulu sebelum fitur agregasi tingkat kampus dikembangkan lebih lanjut.
+
+### Pengguna Potensial
+
+| Pengguna                                | Kebutuhan Utama                                                                                                   | Pain Point yang Diatasi                                                                                  |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Mahasiswa (pengguna utama)              | Mencatat mood & jurnal harian secara cepat dan privat; melihat tren wellbeing pribadi tanpa evaluasi manual konselor | Enggan bercerita langsung ke psikolog/konselor karena stigma sosial; sulit memantau kondisi diri secara konsisten |
+| Unit Konseling / BK Kampus (sekunder)   | Melihat tren wellbeing mahasiswa secara agregat & anonim sebagai dasar perencanaan program dukungan               | Tidak memiliki data real-time untuk mendeteksi kebutuhan dukungan secara proaktif; bergantung pada laporan manual/survei |
+
+### Use Case Diagram
+
+![Use case diagram Instride](assets/w2/use-case.png)
+
+### Functional Requirements
+
+| FR   | Deskripsi |
+| ---- | --------- |
+| FR 1 | Sistem harus memungkinkan mahasiswa melakukan login, mencatat mood, mencatat jurnal harian, serta melihat personal dashboard yang menampilkan riwayat mood dan perkembangan wellbeing dari waktu ke waktu. |
+| FR 2 | Sistem harus dapat menganalisis sentimen jurnal mahasiswa menggunakan model IndoBERT (via Hugging Face Inference API) dan menampilkan hasilnya pada dashboard personal, dengan fallback sentimen sederhana jika API tidak tersedia. |
+| FR 3 | Sistem harus dapat mengagregasikan data mood dan sentimen mahasiswa secara anonim serta menampilkannya pada campus dashboard, tanpa mengakses identitas maupun isi jurnal pribadi mahasiswa. |
+| FR 4 | Sistem harus memastikan data identitas dan isi jurnal pribadi mahasiswa tidak dapat diakses oleh pihak kampus; hanya data agregat dan anonim yang ditampilkan pada Campus Dashboard. |
+| FR 5 | Sistem harus menerapkan role-based access (Supabase Auth & Row Level Security) sehingga mahasiswa dan unit konseling hanya dapat menggunakan fitur sesuai perannya. |
+| FR 6 | Sistem harus menyimpan riwayat mood dan jurnal mahasiswa agar dapat ditampilkan sebagai grafik tren pada Personal Dashboard. |
+| FR 7 | Sistem harus menyediakan halaman Riwayat Jurnal yang menampilkan seluruh entri mood/jurnal, dengan filter rentang tanggal dan kategori sentimen. |
+| FR 8 | Sistem harus menyediakan halaman Profil & Pengaturan untuk mengubah data profil, password, dan preferensi notifikasi pengingat harian. |
+| FR 9 | Sistem harus menyediakan halaman Sumber Daya & Bantuan berisi tips wellbeing serta kontak unit konseling kampus dan layanan kesehatan jiwa nasional, yang dapat diakses tanpa bergantung pada hasil analisis sentimen. |
+
+### Entity Relationship Diagram
+
+![ERD Instride](assets/w2/erd.png)
+
+### Low-Fidelity Wireframe
+
+| Halaman | Wireframe |
+| ------- | --------- |
+| Landing Page | ![Landing](assets/w2/wf-landing.png) |
+| Login | ![Login](assets/w2/wf-login.png) |
+| Register | ![Register](assets/w2/wf-register.png) |
+| Mood & Journal Input | ![Mood & Journal](assets/w2/wf-mood-journal.png) |
+| Personal Dashboard | ![Personal Dashboard](assets/w2/wf-personal-dashboard.png) |
+| Riwayat Jurnal | ![Riwayat](assets/w2/wf-riwayat.png) |
+| Profil & Pengaturan | ![Profil](assets/w2/wf-profil.jpeg) |
+| Sumber Daya & Bantuan | ![Bantuan](assets/w2/wf-bantuan.png) |
+| Campus Dashboard | ![Campus Dashboard](assets/w2/wf-campus-dashboard.png) |
+
+### Gantt Chart (1 Semester)
+
+| Kegiatan | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+| -------- | - | - | - | - | - | - | - | - | - | -- | -- | -- |
+| Finalisasi requirement & setup tech stack (Next.js + Supabase) | ■ | | | | | | | | | | | |
+| UI/UX wireframe, setup repo & deploy skeleton | | ■ | | | | | | | | | | |
+| Sprint 1: Autentikasi, register & role-based access | | | ■ | ■ | | | | | | | | |
+| Sprint 2: Mood tracker, journal & integrasi AI sentiment | | | | | ■ | ■ | | | | | | |
+| Sprint 3: Personal dashboard, trend & riwayat jurnal | | | | | | | ■ | | | | | |
+| Sprint 4 (stretch): Data aggregation & campus dashboard | | | | | | | | ■ | ■ | | | |
+| Sprint 5 (stretch, paralel): Profil, pengaturan & self-help | | | | | | | | ■ | ■ | | | |
+| Testing (unit + manual) & bug fixing | | | | | | | | | ■ | | | |
+| UI polish & penanganan edge case | | | | | | | | | | ■ | | |
+| Final QA & dokumentasi teknis | | | | | | | | | | | ■ | |
+| Evaluasi & persiapan presentasi akhir | | | | | | | | | | | | ■ |
+| CI (GitHub Actions) & CD — berkelanjutan | | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ | ■ |
