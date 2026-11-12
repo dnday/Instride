@@ -2,7 +2,14 @@
 // App di-export statis (GitHub Pages) sehingga tidak bisa memakai API Route Next.js;
 // token Hugging Face tetap rahasia di sini (secret HF_TOKEN), bukan di browser.
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { DEFAULT_MODEL, labelToSentiment, lexiconSentiment, pickTopLabel, type Sentiment } from "../_shared/sentiment.ts";
+import {
+  DEFAULT_MODEL,
+  labelToSentiment,
+  lexiconSentiment,
+  parseGradioSse,
+  pickTopLabel,
+  type Sentiment,
+} from "../_shared/sentiment.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,27 +25,41 @@ const SENTIMENT_KEY = Deno.env.get("SENTIMENT_KEY");
 const HF_TOKEN = Deno.env.get("HF_TOKEN");
 const MODEL = Deno.env.get("HF_MODEL") ?? DEFAULT_MODEL;
 
-const endpoint = SENTIMENT_URL && SENTIMENT_KEY
-  ? { url: SENTIMENT_URL, key: SENTIMENT_KEY }
-  : HF_TOKEN
-    ? { url: `https://router.huggingface.co/hf-inference/models/${MODEL}`, key: HF_TOKEN }
-    : null;
+/** Space Gradio (ZeroGPU): POST minta event_id, lalu GET hasilnya sebagai SSE. */
+async function viaSpace(text: string, signal: AbortSignal): Promise<unknown | null> {
+  const base = SENTIMENT_URL!.replace(/\/+$/, "");
+  const start = await fetch(`${base}/gradio_api/call/predict`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: [text.slice(0, 2000), SENTIMENT_KEY] }),
+    signal,
+  });
+  if (!start.ok) return null;
+  const { event_id } = await start.json();
+  if (!event_id) return null;
+  const res = await fetch(`${base}/gradio_api/call/predict/${event_id}`, { signal });
+  return res.ok ? parseGradioSse(await res.text()) : null;
+}
+
+async function viaHfInference(text: string, signal: AbortSignal): Promise<unknown | null> {
+  const res = await fetch(`https://router.huggingface.co/hf-inference/models/${MODEL}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${HF_TOKEN}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ inputs: text.slice(0, 2000) }),
+    signal,
+  });
+  return res.ok ? res.json() : null;
+}
+
+const remote = SENTIMENT_URL && SENTIMENT_KEY ? viaSpace : HF_TOKEN ? viaHfInference : null;
 
 async function classify(text: string): Promise<{ sentiment: Sentiment; source: "indobert" | "kamus" }> {
-  if (endpoint) {
+  if (remote) {
     try {
       // Timeout 25 detik: Space gratis bisa "bangun tidur" dulu saat lama tidak dipakai
-      const res = await fetch(endpoint.url, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${endpoint.key}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ inputs: text.slice(0, 2000) }),
-        signal: AbortSignal.timeout(25000),
-      });
-      if (res.ok) {
-        const label = pickTopLabel(await res.json());
-        const sentiment = label ? labelToSentiment(label) : null;
-        if (sentiment) return { sentiment, source: "indobert" };
-      }
+      const label = pickTopLabel(await remote(text, AbortSignal.timeout(25000)));
+      const sentiment = label ? labelToSentiment(label) : null;
+      if (sentiment) return { sentiment, source: "indobert" };
     } catch {
       // jatuh ke kamus kata
     }

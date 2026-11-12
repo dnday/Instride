@@ -11,4 +11,4 @@ pinned: false
 
 API analisis sentimen jurnal untuk Instride, menjalankan model [mnrsu/instride](https://huggingface.co/mnrsu/instride)
 (IndoBERT fine-tuned pada SmSA). Dipanggil oleh Supabase Edge Function `analyze-sentiment`; request wajib membawa API key.
-Halaman uji manual: `/ui`.
+Hardware: ZeroGPU. Endpoint API `/gradio_api/call/predict` (berkunci, berjalan di CPU); halaman utama untuk uji manual.

@@ -60,3 +60,13 @@ describe("sentimen", () => {
     expect(pickTopLabel({ error: "loading" })).toBeNull();
   });
 });
+
+describe("respons API Gradio (Space)", () => {
+  it("membaca event complete dan menolak event error", async () => {
+    const { parseGradioSse } = await import("../../supabase/functions/_shared/sentiment");
+    const ok = 'event: complete\ndata: [[{"label": "positive", "score": 0.0007}, {"label": "negative", "score": 0.9988}]]\n\n';
+    expect(pickTopLabel(parseGradioSse(ok))).toBe("negative");
+    expect(parseGradioSse("event: error\ndata: null\n\n")).toBeNull();
+    expect(parseGradioSse("event: heartbeat\ndata: null\n\n")).toBeNull();
+  });
+});
