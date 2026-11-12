@@ -79,3 +79,31 @@ export function weeklySummary(entries: DayEntry[], now = new Date()) {
     counts: SENTIMENTS.map((s) => ({ sentiment: s, count: counts.get(s) ?? 0 })),
   };
 }
+
+/** Sel kalender satu bulan (Senin pertama), termasuk sel kosong sebelum tanggal 1. */
+export function monthGrid(entries: DayEntry[], month: Date) {
+  const byDate = new Map(entries.map((e) => [e.date, e]));
+  const first = new Date(month.getFullYear(), month.getMonth(), 1);
+  const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+  const lead = (first.getDay() + 6) % 7; // Senin = 0
+  const cells: ({ date: string; day: number; mood: number | null; journals: number } | null)[] = Array(lead).fill(null);
+  for (let d = 1; d <= days; d++) {
+    const date = dayKey(new Date(month.getFullYear(), month.getMonth(), d));
+    const e = byDate.get(date);
+    cells.push({ date, day: d, mood: e?.mood ?? null, journals: e?.journals.length ?? 0 });
+  }
+  return cells;
+}
+
+/** Jumlah hari beruntun mencatat, berakhir hari ini (atau kemarin bila hari ini belum mencatat). */
+export function streak(entries: DayEntry[], now = new Date()) {
+  const logged = new Set(entries.map((e) => e.date));
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (!logged.has(dayKey(day))) day.setDate(day.getDate() - 1);
+  let n = 0;
+  while (logged.has(dayKey(day))) {
+    n++;
+    day.setDate(day.getDate() - 1);
+  }
+  return n;
+}

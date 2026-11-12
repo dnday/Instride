@@ -112,7 +112,7 @@ export function StudentPage({ title, intro, children }: { title: string; intro?:
     <div className="min-h-screen bg-surface">
       <StudentNav />
       <main className="max-w-5xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
-        <div>
+        <div className="page-enter">
           <h1 className="font-serif text-3xl font-semibold text-ink">{title}</h1>
           {intro && <p className="mt-1 text-muted">{intro}</p>}
         </div>

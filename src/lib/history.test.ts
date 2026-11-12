@@ -99,3 +99,21 @@ describe("respons API Gradio (Space)", () => {
     expect(parseGradioSse("event: heartbeat\ndata: null\n\n")).toBeNull();
   });
 });
+
+describe("kalender & hari beruntun", () => {
+  it("grid November 2026 mulai Minggu, jadi 6 sel kosong di depan", async () => {
+    const { monthGrid } = await import("./history");
+    const g = monthGrid(entries, new Date(2026, 10, 1));
+    expect(g.slice(0, 6).every((c) => c === null)).toBe(true);
+    expect(g[6]).toMatchObject({ day: 1, date: "2026-11-01" });
+    expect(g.filter(Boolean)).toHaveLength(30);
+    expect(g.find((c) => c?.day === 10)).toMatchObject({ mood: 3, journals: 1 });
+  });
+
+  it("hari beruntun berhenti di hari kosong", async () => {
+    const { streak } = await import("./history");
+    expect(streak(entries, new Date(2026, 10, 12, 20))).toBe(3); // 10, 11, 12
+    expect(streak(entries, new Date(2026, 10, 13, 8))).toBe(3); // hari ini belum mencatat: hitung sampai kemarin
+    expect(streak(entries, new Date(2026, 10, 15))).toBe(0);
+  });
+});

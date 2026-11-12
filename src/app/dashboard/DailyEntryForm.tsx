@@ -146,13 +146,11 @@ export default function DailyEntryForm({
                   title={MOOD_LABELS[v]}
                   onClick={() => setMood(v)}
                   style={active ? { borderColor: color.fill, background: color.tint } : undefined}
-                  className={`flex min-h-11 flex-col items-center gap-1.5 rounded-2xl border-2 px-1 py-3 transition hover:-translate-y-0.5 motion-reduce:transform-none ${
+                  className={`mood-option flex min-h-11 flex-col items-center gap-1.5 rounded-2xl border-2 px-1 py-3 ${
                     active ? "text-ink" : "border-transparent text-muted hover:bg-surface"
                   }`}
                 >
-                  <span key={active ? "on" : "off"} className={active ? "mood-pop" : ""}>
-                    <MoodFace value={v} active={active} className="h-10 w-10 sm:h-12 sm:w-12" />
-                  </span>
+                  <MoodFace value={v} active={active} className="h-10 w-10 sm:h-12 sm:w-12" />
                   <span className={`text-center text-xs leading-tight ${active ? "font-semibold" : "font-medium"}`}>{MOOD_LABELS[v]}</span>
                 </button>
               );
