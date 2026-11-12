@@ -16,35 +16,53 @@ body {
   outline-color: #ffffff;
 }
 
-/* ---------- Gerak (better-ui): satu momen per halaman, hanya bila pengguna tidak memilih reduce motion ----------
-   Masuk: opacity + blur 4px + translateY 12px, 300ms ease-out, berjenjang 100ms (judul, deskripsi, aksi).
-   State interaktif memakai transition (bisa berbalik di tengah jalan), bukan keyframe. */
-@keyframes enter {
-  from { opacity: 0; filter: blur(4px); transform: translateY(12px); }
+/* ---------- Sistem gerak ----------
+   Token dari referensi: impeccable animate.md (durasi per jenis, kedatangan cubic-bezier(0.16,1,0.3,1),
+   keluar lebih cepat dari masuk), better-ui (masuk opacity + blur 4px + 12px, stagger 100ms, tekan 0.96/150ms,
+   state interaktif lewat transition agar bisa berbalik), MengTo animation-systems (restraint, satu momen fokus).
+   Semua gerak spasial hanya tanpa reduce motion; dengan reduce motion tetap ada cross-fade opacity. */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1); /* kedatangan mantap, tanpa pantulan */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* gerak bolak-balik, mis. napas */
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1); /* keluar: lebih cepat */
+  --dur-press: 150ms; /* umpan balik langsung */
+  --dur-state: 220ms; /* perubahan state rutin */
+  --dur-enter: 300ms; /* elemen masuk */
+  --dur-focal: 600ms; /* momen fokus yang disengaja */
 }
-@keyframes draw {
-  to { stroke-dashoffset: 0; }
-}
-@keyframes fade {
-  from { opacity: 0; }
-}
-@keyframes cell-in {
-  from { opacity: 0; transform: scale(0.6); }
-}
+
+@keyframes enter { from { opacity: 0; filter: blur(4px); transform: translateY(12px); } }
+@keyframes pop-in { from { opacity: 0; transform: translateY(4px) scale(0.98); } }
+@keyframes step-in { from { opacity: 0; transform: translateX(16px); } }
+@keyframes cell-in { from { opacity: 0; transform: translateY(6px) scale(0.98); } }
+@keyframes bar-grow { from { transform: scaleX(0); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes fade { from { opacity: 0; } }
+
+/* Semua orang: cross-fade opacity (pengganti gerak bila reduce motion) */
+.page-enter > *, .hero-enter > * > *, .pop-in, .step-in, .cell-in { animation: fade var(--dur-state) ease-out both; }
+
 @media (prefers-reduced-motion: no-preference) {
-  .hero-enter > * > *, .page-enter > * { animation: enter 300ms ease-out both; }
+  /* Judul halaman: judul, deskripsi, aksi berjenjang 100ms */
+  .hero-enter > * > *, .page-enter > * { animation: enter var(--dur-enter) var(--ease-out) both; }
   .hero-enter > * > *:nth-child(2), .page-enter > *:nth-child(2) { animation-delay: 100ms; }
   .page-enter > *:nth-child(3) { animation-delay: 200ms; }
-  /* Centang tergambar saat catatan tersimpan */
-  .check-draw { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 450ms 100ms ease-out forwards; }
-  /* Kalender mood terisi bertahap; jeda per sel diatur lewat --i */
-  .cell-in { animation: cell-in 300ms ease-out both; animation-delay: calc(var(--i, 0) * 12ms); }
-  .mood-option { transition-property: scale, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+
+  /* Notifikasi, kartu krisis, konfirmasi hapus: muncul halus, bukan mendadak */
+  .pop-in { animation: pop-in var(--dur-state) var(--ease-out) both; }
+  /* Langkah grounding bergeser maju */
+  .step-in { animation: step-in var(--dur-enter) var(--ease-out) both; }
+  /* Kalender terisi bertahap; total jeda dibatasi 300ms */
+  .cell-in { animation: cell-in var(--dur-enter) var(--ease-out) both; animation-delay: min(calc(var(--i, 0) * 8ms), 300ms); }
+  /* Batang sentimen tumbuh sekali dari kiri (transform, bukan width) */
+  .bar-grow { transform-origin: left; animation: bar-grow var(--dur-focal) var(--ease-out) both; }
+  /* Centang tergambar */
+  .check-draw { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 400ms 120ms var(--ease-out) forwards; }
+
+  /* Pilihan mood: transition (bisa berbalik bila pengguna ganti pilihan di tengah gerak) */
+  .mood-option { transition: scale var(--dur-state) var(--ease-out), background-color var(--dur-state) ease-out, border-color var(--dur-state) ease-out; }
   .mood-option[aria-checked="true"] { scale: 1.06; }
-}
-@media (prefers-reduced-motion: reduce) {
-  /* Pengganti gerak: cross-fade opacity, bukan muncul mendadak */
-  .page-enter > *, .hero-enter > * > * { animation: fade 200ms ease-out both; }
+  .mood-option:not([aria-checked="true"]):active { scale: 0.96; }
 }
 
 /* ---------- Permukaan bawaan browser ikut bertema (impeccable craft floor) ---------- */
@@ -63,10 +81,11 @@ a { text-underline-offset: 3px; }
   .card {
     @apply bg-white rounded-2xl border border-brand-100 p-5 sm:p-6;
   }
-  /* Ditekan: scale 0.96, 150ms ease-out; tombol nonaktif tidak mengecil (better-ui) */
+  /* Ditekan: scale 0.96, 150ms ease-out; tombol nonaktif tidak mengecil (better-ui).
+     Tailwind 3 menerapkan scale-* lewat `transform`, jadi transform yang ditransisikan. */
   .btn {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-700 px-5 text-sm font-semibold text-white
-      transition-[scale,background-color,border-color] duration-150 ease-out hover:bg-brand-900 enabled:active:scale-[0.96]
+      transition-[transform,background-color,border-color] duration-150 ease-out hover:bg-brand-900 enabled:active:scale-[0.96]
       disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:enabled:active:scale-100;
   }
   .btn-ghost {

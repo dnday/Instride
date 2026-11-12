@@ -58,8 +58,16 @@ export function BreathingExercise() {
       <div className="relative my-8 grid h-56 w-56 place-items-center" aria-hidden="true">
         <div className="absolute inset-0 rounded-full bg-brand-50" />
         <div
-          className="absolute inset-3 rounded-full bg-gradient-to-br from-[#CFE9E6] to-[#5FA67F] opacity-90 shadow-[0_20px_60px_-20px_rgba(42,116,112,0.7)] ease-in-out motion-reduce:!transition-none"
-          style={{ transform: `scale(${scale})`, transition: `transform ${running ? current.secs : 0.6}s` }}
+          className="absolute inset-0 rounded-full border-2 border-brand motion-reduce:!transition-none"
+          style={{
+            transform: `scale(${scale * 1.08})`,
+            opacity: running && phase === 0 ? 0.6 : 0,
+            transition: `transform ${running ? current.secs : 0.6}s var(--ease-in-out), opacity ${running ? current.secs : 0.3}s ease-out`,
+          }}
+        />
+        <div
+          className="absolute inset-3 rounded-full bg-gradient-to-br from-[#CFE9E6] to-[#5FA67F] shadow-[0_20px_60px_-20px_rgba(42,116,112,0.7)] motion-reduce:!transition-none"
+          style={{ transform: `scale(${scale})`, transition: `transform ${running ? current.secs : 0.6}s var(--ease-in-out)` }}
         />
         <div className="tnum relative font-serif text-4xl font-semibold text-brand-900">
           {running ? left : done ? <svg viewBox="0 0 24 24" aria-hidden="true" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg> : null}
@@ -117,13 +125,13 @@ export function GroundingExercise() {
       </ol>
 
       {finished ? (
-        <div className="mt-6 text-center">
+        <div className="pop-in mt-6 text-center">
           <p className="font-serif text-xl font-semibold text-ink">Kamu kembali ke saat ini.</p>
           <p className="mt-1 text-sm text-muted">Tarik napas sekali lagi, lalu lanjutkan harimu pelan-pelan.</p>
           <button type="button" className="btn-ghost mt-5" onClick={() => setStep(0)}>Ulangi</button>
         </div>
       ) : (
-        <div key={step} className="page-enter mt-6">
+        <div key={step} className="step-in mt-6">
           <div className="flex items-center gap-4">
             <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
               <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

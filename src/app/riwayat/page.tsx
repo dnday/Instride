@@ -144,7 +144,7 @@ export default function RiwayatPage() {
                       </div>
                       <p className="mt-2 whitespace-pre-line break-words text-ink leading-relaxed">{j.content}</p>
                       {confirmId === j.id && (
-                        <div role="alert" className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm">
+                        <div role="alert" className="pop-in mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 p-3 text-sm">
                           <span className="mr-auto font-medium text-ink">Hapus jurnal ini secara permanen?</span>
                           <button type="button" className="btn bg-negative hover:bg-negative" disabled={deleting} onClick={() => removeJournal(j.id)}>
                             {deleting ? "Menghapus..." : "Ya, hapus"}
