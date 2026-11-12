@@ -123,8 +123,7 @@ export default function Home() {
         <section data-enter className="hero-enter -mt-16 min-h-svh flex flex-col justify-center pt-28 pb-12">
           <div className="wrap grid gap-x-6 gap-y-12 lg:grid-cols-12 items-start">
             <div className="hero-text min-w-0 lg:col-span-6">
-              <p className="text-xs font-semibold tracking-wider uppercase text-brand-700">Untuk mahasiswa dan unit konseling</p>
-              <h1 className="mt-4 font-serif text-[2rem] sm:text-5xl lg:text-[3.5rem] font-semibold leading-tight text-ink text-balance">
+              <h1 className="font-serif text-[2rem] sm:text-5xl lg:text-[3.5rem] font-semibold leading-tight text-ink text-balance">
                 {/* tanda hubung tak terputus agar "wellbeing-mu" tidak terpotong di akhir baris */}
                 Pantau wellbeing‑mu, mulai dari hari ini
               </h1>

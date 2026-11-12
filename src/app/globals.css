@@ -16,15 +16,42 @@ body {
   outline-color: #ffffff;
 }
 
-/* Hero masuk sekali saat halaman dimuat */
+/* ---------- Gerak (better-ui): satu momen per halaman, hanya bila pengguna tidak memilih reduce motion ----------
+   Masuk: opacity + blur 4px + translateY 12px, 300ms ease-out, berjenjang 100ms (judul, deskripsi, aksi).
+   State interaktif memakai transition (bisa berbalik di tengah jalan), bukan keyframe. */
 @keyframes enter {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; filter: blur(4px); transform: translateY(12px); }
+}
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes fade {
+  from { opacity: 0; }
+}
+@keyframes cell-in {
+  from { opacity: 0; transform: scale(0.6); }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .hero-enter > * > * { animation: enter 0.5s ease-out both; }
-  .hero-enter > * > *:nth-child(2) { animation-delay: 0.12s; }
+  .hero-enter > * > *, .page-enter > * { animation: enter 300ms ease-out both; }
+  .hero-enter > * > *:nth-child(2), .page-enter > *:nth-child(2) { animation-delay: 100ms; }
+  .page-enter > *:nth-child(3) { animation-delay: 200ms; }
+  /* Centang tergambar saat catatan tersimpan */
+  .check-draw { stroke-dasharray: 30; stroke-dashoffset: 30; animation: draw 450ms 100ms ease-out forwards; }
+  /* Kalender mood terisi bertahap; jeda per sel diatur lewat --i */
+  .cell-in { animation: cell-in 300ms ease-out both; animation-delay: calc(var(--i, 0) * 12ms); }
+  .mood-option { transition-property: scale, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+  .mood-option[aria-checked="true"] { scale: 1.06; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Pengganti gerak: cross-fade opacity, bukan muncul mendadak */
+  .page-enter > *, .hero-enter > * > * { animation: fade 200ms ease-out both; }
 }
 
+/* ---------- Permukaan bawaan browser ikut bertema (impeccable craft floor) ---------- */
+::selection { background: #cfe9e6; color: #1f2a2b; }
+html { accent-color: #2a7470; caret-color: #2a7470; scrollbar-color: #9aa5a2 transparent; -webkit-tap-highlight-color: transparent; }
+a { text-underline-offset: 3px; }
+.tnum { font-variant-numeric: tabular-nums; }
 
 /* Satu sistem komponen (acuan taste-skill: satu gaya kartu & tombol, hover/press, target sentuh 44px) */
 @layer components {
@@ -36,10 +63,11 @@ body {
   .card {
     @apply bg-white rounded-2xl border border-brand-100 p-5 sm:p-6;
   }
+  /* Ditekan: scale 0.96, 150ms ease-out; tombol nonaktif tidak mengecil (better-ui) */
   .btn {
     @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-brand-700 px-5 text-sm font-semibold text-white
-      transition hover:-translate-y-px hover:bg-brand-900 active:translate-y-0 active:scale-[0.98]
-      disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:transform-none;
+      transition-[scale,background-color,border-color] duration-150 ease-out hover:bg-brand-900 enabled:active:scale-[0.96]
+      disabled:cursor-not-allowed disabled:opacity-60 motion-reduce:enabled:active:scale-100;
   }
   .btn-ghost {
     @apply btn bg-transparent text-brand-900 border border-brand-700 hover:bg-brand-50;

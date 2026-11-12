@@ -51,6 +51,10 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         <li>Supabase: penyimpanan database dan autentikasi.</li>
         <li>Hugging Face: menjalankan model analisis sentimen (menerima teks jurnal tanpa identitas).</li>
         <li>GitHub Pages: hosting halaman aplikasi (tidak menyimpan data jurnal).</li>
+        <li>
+          Fitur Dikte suara (opsional) memakai pengenalan suara bawaan browser. Di Chrome dan Edge, rekaman suaramu
+          diproses oleh layanan pengenalan suara Google atau Microsoft. Jika tidak ingin, cukup ketik jurnalmu.
+        </li>
       </ul>
     ),
   },

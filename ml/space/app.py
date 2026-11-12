@@ -24,7 +24,8 @@ LABELS = [model.config.id2label[i] for i in range(model.config.num_labels)]
 
 
 def _scores(text: str, device: str) -> list[dict]:
-    enc = tokenizer(text.strip()[:2000], truncation=True, max_length=128, return_tensors="pt").to(device)
+    # Panjang dibatasi tokenizer: 128 token, sama dengan saat training (ml/train_sentiment.py)
+    enc = tokenizer(text.strip(), truncation=True, max_length=128, return_tensors="pt").to(device)
     with torch.no_grad():
         probs = model.to(device)(**enc).logits.softmax(-1)[0].tolist()
     return [{"label": label, "score": round(p, 6)} for label, p in zip(LABELS, probs)]
