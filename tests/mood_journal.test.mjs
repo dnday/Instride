@@ -80,3 +80,53 @@ test("deteksi Today: query rentang hari ini hanya melihat baris hari ini", async
   // dua mood hari ini (value 4 dan 2), bukan yang kemarin
   assert.equal(rows.length, 2, "hanya entri hari ini yang terdeteksi");
 });
+
+// --- save_daily_entry: mood + jurnal dalam satu transaksi (jurnal opsional) ---
+
+const count = async (table) =>
+  Number((await db.query(`SELECT count(*) AS n FROM ${table} WHERE user_id = '${ALICE}'`)).rows[0].n);
+
+test("save_daily_entry: mood + jurnal tersimpan bersama", async () => {
+  const [m0, j0] = [await count("moods"), await count("journals")];
+  const [row] = await as("authenticated", ALICE, `SELECT save_daily_entry(4, 'Hari ini cukup baik') AS r`);
+  assert.ok(row.r.mood_id, "mood_id dikembalikan");
+  assert.ok(row.r.journal_id, "journal_id dikembalikan");
+  assert.equal(await count("moods"), m0 + 1);
+  assert.equal(await count("journals"), j0 + 1);
+});
+
+test("save_daily_entry: jurnal kosong/spasi/null berarti hanya mood", async () => {
+  const j0 = await count("journals");
+  for (const sql of [`save_daily_entry(3, '   ')`, `save_daily_entry(3, '')`, `save_daily_entry(3)`]) {
+    const [row] = await as("authenticated", ALICE, `SELECT ${sql} AS r`);
+    assert.equal(row.r.journal_id, null);
+  }
+  assert.equal(await count("journals"), j0);
+});
+
+test("save_daily_entry: input tidak valid ditolak tanpa menyisakan data", async () => {
+  const m0 = await count("moods");
+  await assert.rejects(as("authenticated", ALICE, `SELECT save_daily_entry(0, 'x')`), /Mood harus/);
+  await assert.rejects(as("authenticated", ALICE, `SELECT save_daily_entry(NULL, 'x')`), /Mood harus/);
+  await assert.rejects(as("authenticated", ALICE, `SELECT save_daily_entry(3, repeat('a', 5001))`), /journals_content_check/);
+  assert.equal(await count("moods"), m0, "mood tidak tersimpan bila jurnal ditolak (atomik)");
+});
+
+test("save_daily_entry: tanpa sesi ditolak dan anon tidak punya akses", async () => {
+  await assert.rejects(as("authenticated", null, `SELECT save_daily_entry(3)`), /Sesi tidak valid/);
+  await assert.rejects(as("anon", null, `SELECT save_daily_entry(3)`), /permission denied/);
+});
+
+test("nama profil: kosong atau lebih dari 100 karakter ditolak", async () => {
+  await assert.rejects(as("authenticated", ALICE, `UPDATE users SET name = '  ' WHERE user_id = '${ALICE}'`));
+  await assert.rejects(as("authenticated", ALICE, `UPDATE users SET name = repeat('a', 101) WHERE user_id = '${ALICE}'`));
+  await as("authenticated", ALICE, `UPDATE users SET name = repeat('a', 100) WHERE user_id = '${ALICE}'`);
+});
+
+test("signup: nama terlalu panjang dipotong ke 100 karakter, signup tidak gagal", async () => {
+  await db.exec(
+    `INSERT INTO auth.users VALUES ('${id(2)}', 'bob@ugm.ac.id', '{"name":"${"b".repeat(150)}"}')`
+  );
+  const [u] = (await db.query(`SELECT char_length(name) AS n FROM users WHERE user_id = '${id(2)}'`)).rows;
+  assert.equal(Number(u.n), 100);
+});

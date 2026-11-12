@@ -45,3 +45,20 @@ describe("Property 4: journal error messages are non-empty", () => {
     );
   });
 });
+
+describe("optional journal (catatan harian)", () => {
+  it("kosong atau hanya spasi diterima bila optional", () => {
+    expect(validateJournal({ content: "" }, { optional: true })).toEqual({ ok: true, errors: {} });
+    expect(validateJournal({ content: "   " }, { optional: true }).ok).toBe(true);
+  });
+
+  it("batas 5000 karakter tetap berlaku bila optional", () => {
+    expect(validateJournal({ content: "a".repeat(5001) }, { optional: true }).errors.content).toBe(
+      JOURNAL_MESSAGES.contentTooLong,
+    );
+  });
+
+  it("tanpa opsi, perilaku lama tetap: kosong ditolak", () => {
+    expect(validateJournal({ content: "" }).errors.content).toBe(JOURNAL_MESSAGES.contentRequired);
+  });
+});

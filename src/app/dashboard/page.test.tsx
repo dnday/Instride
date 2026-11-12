@@ -8,8 +8,11 @@ const push = vi.fn();
 const router = { replace, push };
 vi.mock("next/navigation", () => ({ useRouter: () => router }));
 
-vi.mock("./MoodForm", () => ({ default: () => <div data-testid="mood-form" /> }));
-vi.mock("./JournalForm", () => ({ default: () => <div data-testid="journal-form" /> }));
+vi.mock("./DailyEntryForm", () => ({
+  default: ({ alreadyToday }: { alreadyToday: boolean }) => (
+    <div data-testid="daily-entry-form" data-already={String(alreadyToday)} />
+  ),
+}));
 
 const h = vi.hoisted(() => {
   class FakeConfigError extends Error {}
@@ -45,10 +48,22 @@ beforeEach(() => {
 });
 
 describe("DashboardPage session gate", () => {
-  it("renders both forms when a session exists", async () => {
+  it("renders the daily entry form when a session exists", async () => {
     render(<DashboardPage />);
-    expect(await screen.findByTestId("mood-form")).toBeInTheDocument();
-    expect(screen.getByTestId("journal-form")).toBeInTheDocument();
+    const form = await screen.findByTestId("daily-entry-form");
+    expect(form).toHaveAttribute("data-already", "false");
+  });
+
+  it("marks today as recorded when an entry exists today", async () => {
+    h.limit.mockResolvedValue({ data: [{ mood_id: 1 }] });
+    render(<DashboardPage />);
+    expect(await screen.findByTestId("daily-entry-form")).toHaveAttribute("data-already", "true");
+  });
+
+  it("shows a warning when today's status fails to load", async () => {
+    h.limit.mockResolvedValue({ data: null, error: { message: "Failed to fetch" } });
+    render(<DashboardPage />);
+    expect(await screen.findByText(/gagal dimuat/i)).toBeInTheDocument();
   });
 
   it("redirects to /login when there is no session", async () => {
