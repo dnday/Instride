@@ -26,7 +26,7 @@ Validasi diterapkan pada sisi frontend dan backend.
 
 | Field | Required | Validation |
 |---|---|---|
-| `name` | Yes | Tidak boleh kosong |
+| `name` | Yes | Tidak boleh kosong, maksimal 100 karakter |
 | `email` | Yes | Tidak boleh kosong dan harus memiliki format email yang valid |
 | `password` | Yes | Tidak boleh kosong, minimal 6 karakter |
 
@@ -34,6 +34,7 @@ Validasi diterapkan pada sisi frontend dan backend.
 
 - `name` wajib diisi.
 - `name` tidak boleh kosong.
+- `name` maksimal 100 karakter (dihitung setelah spasi di awal/akhir dibuang). Pesan: `Nama maksimal 100 karakter`. Database menegakkan aturan yang sama (`users_name_check`).
 - `email` wajib diisi.
 - `email` tidak boleh kosong.
 - `email` harus memiliki format email yang valid.
@@ -152,15 +153,13 @@ Expected result: sistem menolak input.
 
 | Field | Required | Validation |
 |---|---|---|
-| `content` | Yes | Tidak boleh kosong dan tidak boleh melebihi batas karakter sistem |
+| `content` | No (pada Catatan Harian) | Boleh kosong; bila diisi maksimal 5000 karakter |
 
 ### Rules
 
-- `content` wajib diisi.
-- `content` tidak boleh kosong.
-- `content` tidak boleh melebihi batas karakter yang ditentukan sistem.
-- Sistem harus menolak input apabila `content` tidak tersedia atau kosong.
-- Sistem harus menolak input apabila `content` melebihi batas karakter yang ditentukan sistem.
+- Pada form Catatan Harian, `content` **opsional**. Kosong atau hanya spasi berarti hanya mood yang disimpan.
+- `content` maksimal 5000 karakter. Pesan: `Jurnal maksimal 5000 karakter`.
+- Database menolak jurnal kosong atau lebih dari 5000 karakter (`journals_content_check`), sehingga jurnal kosong tidak pernah tersimpan sebagai baris.
 
 ### Valid Example
 
@@ -168,13 +167,13 @@ Expected result: sistem menolak input.
   "content": "Hari ini saya merasa cukup baik."
 }
 
-### Invalid Example — Content Kosong
+### Example — Content Kosong
 
 {
   "content": ""
 }
 
-Expected result: sistem menolak input dan menampilkan pesan validasi.
+Expected result: mood tetap disimpan, jurnal tidak dibuat.
 
 ### Invalid Example — Melebihi Batas Karakter
 
@@ -184,7 +183,14 @@ Expected result: sistem menolak input dan menampilkan pesan validasi.
 
 Expected result: sistem menolak input dan menampilkan pesan validasi.
 
-> `TEST_CASES.md` menetapkan bahwa journal memiliki batas karakter, tetapi nilai maksimum karakter spesifik belum dicantumkan. Karena itu, dokumen ini tidak menetapkan angka baru. :contentReference[oaicite:3]{index=3}
+## 4.2 Catatan Harian (mood + jurnal)
+
+Mood dan jurnal diisi dalam satu form dan disimpan sekaligus lewat fungsi database `save_daily_entry(p_mood, p_content)`.
+
+- `mood` wajib, bilangan bulat 1–5.
+- `content` opsional, maksimal 5000 karakter.
+- Validasi dijalankan dua kali: di form (pesan per field, semua error tampil sekaligus) dan di database.
+- Penyimpanan bersifat atomik: bila salah satu gagal, tidak ada data yang tersimpan.
 
 ---
 

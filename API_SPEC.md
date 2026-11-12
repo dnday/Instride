@@ -108,6 +108,46 @@ Mengambil data mood mahasiswa.
 
 ---
 
+### 2.3 Save Daily Entry (mood + jurnal)
+
+**Endpoint**
+
+`POST /rest/v1/rpc/save_daily_entry` (Supabase RPC, dipanggil lewat `supabase.rpc("save_daily_entry", ...)`)
+
+**Description**
+
+Menyimpan mood dan jurnal opsional milik pengguna yang sedang login dalam satu transaksi. Hanya role `mahasiswa` yang bisa menyimpan (RLS).
+
+**Request Body**
+
+```json
+{
+  "p_mood": 4,
+  "p_content": "Hari ini saya merasa cukup baik."
+}
+```
+
+`p_content` boleh `null` atau dihilangkan bila hanya menyimpan mood.
+
+**Response**
+
+```json
+{ "mood_id": 12, "journal_id": 7 }
+```
+
+`journal_id` bernilai `null` bila jurnal tidak diisi.
+
+**Errors**
+
+| SQLSTATE | Kondisi |
+|---|---|
+| `28000` | Tidak ada sesi login |
+| `22023` | `p_mood` kosong atau di luar 1–5 |
+| `23514` | `p_content` lebih dari 5000 karakter |
+| `42501` | Role bukan mahasiswa (ditolak RLS) |
+
+---
+
 ## 3. Journal
 
 Journal digunakan untuk menyimpan catatan harian mahasiswa.
@@ -235,6 +275,7 @@ Data mood dan journal yang bersifat personal harus dikaitkan dengan pengguna yan
 | `POST` | `/api/moods` | Menyimpan mood |
 | `GET` | `/api/moods` | Mengambil data mood |
 | `POST` | `/api/journals` | Menyimpan journal |
+| `POST` | `/rest/v1/rpc/save_daily_entry` | Menyimpan mood + journal sekaligus (dipakai form Catatan Harian) |
 | `GET` | `/api/journals` | Mengambil data journal |
 
 ---

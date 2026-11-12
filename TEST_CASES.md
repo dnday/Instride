@@ -272,8 +272,8 @@ Status pengujian:
 | Test ID | TC-JOURNAL-002 |
 | Feature | Journal Validation |
 | Precondition | User telah login |
-| Input | Isi jurnal kosong/tidak tersedia |
-| Expected Result | Sistem menolak input dan menampilkan validation error |
+| Input | Mood valid, isi jurnal kosong/tidak tersedia |
+| Expected Result | Mood tersimpan, jurnal tidak dibuat (jurnal opsional pada Catatan Harian) |
 | Status | NOT RUN |
 
 ---
@@ -287,6 +287,45 @@ Status pengujian:
 | Precondition | User telah login |
 | Input | Isi jurnal melebihi batas karakter yang ditentukan sistem |
 | Expected Result | Sistem menolak input dan menampilkan validation error |
+| Status | NOT RUN |
+
+---
+
+## TC-DAILY-001 — Simpan mood + jurnal dalam satu transaksi
+
+| Field | Value |
+|---|---|
+| Test ID | TC-DAILY-001 |
+| Feature | Catatan Harian |
+| Precondition | User mahasiswa telah login |
+| Input | Mood 4 dan jurnal valid |
+| Expected Result | Satu baris mood dan satu baris jurnal tersimpan |
+| Status | NOT RUN |
+
+---
+
+## TC-DAILY-002 — Jurnal ditolak, mood ikut batal
+
+| Field | Value |
+|---|---|
+| Test ID | TC-DAILY-002 |
+| Feature | Catatan Harian |
+| Precondition | User mahasiswa telah login |
+| Input | Mood valid, jurnal lebih dari 5000 karakter (dikirim langsung ke API) |
+| Expected Result | Ditolak; tidak ada mood maupun jurnal yang tersimpan |
+| Status | NOT RUN |
+
+---
+
+## TC-AUTH-012 — Register dengan nama lebih dari 100 karakter
+
+| Field | Value |
+|---|---|
+| Test ID | TC-AUTH-012 |
+| Feature | Authentication Validation |
+| Precondition | - |
+| Input | Nama 101 karakter |
+| Expected Result | Sistem menolak input dan menampilkan error pada field `name` |
 | Status | NOT RUN |
 
 ---
@@ -318,3 +357,6 @@ Terakhir dijalankan: 9 Oktober 2026. Test otomatis dijalankan dengan `npm run te
 | TC-JOURNAL-001 | NOT RUN | - | Menunggu form Jurnal (Issue #9) |
 | TC-JOURNAL-002 | NOT RUN | - | Menunggu form Jurnal (Issue #9) |
 | TC-JOURNAL-003 | NOT RUN | - | Menunggu form Jurnal (Issue #9) dan batas karakter |
+| TC-DAILY-001 | NOT RUN | - | Otomatis: `tests/mood_journal.test.mjs`, `src/app/dashboard/DailyEntryForm.test.tsx` |
+| TC-DAILY-002 | NOT RUN | - | Otomatis: `tests/mood_journal.test.mjs` |
+| TC-AUTH-012 | NOT RUN | - | Otomatis: `src/lib/authValidation.test.ts` |
