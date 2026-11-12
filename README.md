@@ -18,7 +18,7 @@ flowchart LR
 
 - **Frontend**: Next.js 14 (App Router, `output: 'export'`) + Tailwind CSS, disajikan di `/Instride/app`.
 - **Backend**: Supabase. Tidak ada server sendiri; keamanan data ditegakkan di database lewat Row Level Security.
-- **Privasi**: konselor hanya mengakses `campus_wellbeing_stats()`, yaitu agregat mingguan dengan k-anonymity (k = 5). Periode atau metrik yang berasal dari kurang dari 5 mahasiswa tidak ditampilkan.
+- **Privasi**: konselor hanya mengakses `campus_wellbeing_stats()`, yaitu agregat mingguan dengan k-anonymity (k = 10). Periode atau metrik yang berasal dari kurang dari 10 mahasiswa tidak ditampilkan.
 
 ## Setup lokal
 

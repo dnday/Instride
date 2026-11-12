@@ -99,7 +99,7 @@ export default function CampusDashboard() {
             <path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6l-7-3Z" />
           </svg>
           Data ditampilkan secara agregat &amp; anonim — tanpa identitas maupun isi jurnal mahasiswa. Periode dengan
-          kurang dari 5 mahasiswa aktif tidak ditampilkan.
+          kurang dari 10 mahasiswa aktif tidak ditampilkan.
         </p>
       </main>
     </div>
@@ -137,7 +137,7 @@ function Overview({ stats }: { stats: Stat[] }) {
       <div className="bg-white rounded-2xl border border-brand-100 p-8 text-center">
         <h2 className="text-lg font-semibold text-ink">Belum cukup data untuk ditampilkan</h2>
         <p className="mt-2 text-muted max-w-lg mx-auto">
-          Statistik muncul setelah minimal 5 mahasiswa mencatat mood atau jurnal dalam satu minggu. Batas ini menjaga
+          Statistik muncul setelah minimal 10 mahasiswa mencatat mood atau jurnal dalam satu minggu. Batas ini menjaga
           agar tidak ada mahasiswa yang dapat dikenali dari data agregat.
         </p>
       </div>
@@ -172,7 +172,7 @@ function Overview({ stats }: { stats: Stat[] }) {
           <p className="text-sm text-muted">Hasil analisis AI minggu ini</p>
           {latest.positive_percentage == null ? (
             <p className="mt-6 text-sm text-muted">
-              Data sentimen minggu ini belum mencapai 5 mahasiswa, sehingga belum ditampilkan.
+              Data sentimen minggu ini belum mencapai 10 mahasiswa, sehingga belum ditampilkan.
             </p>
           ) : (
             <>
