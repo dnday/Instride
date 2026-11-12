@@ -1,5 +1,4 @@
 import { BreathingExercise, GroundingExercise } from "@/components/CalmTools";
-import { StudentNav } from "@/components/StudentShell";
 
 const ICON = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z",
@@ -42,12 +41,11 @@ const TIPS = [
 // Halaman publik: tidak bergantung pada login maupun hasil analisis sentimen (FR 9)
 export default function BantuanPage() {
   return (
-    <div className="min-h-screen bg-surface">
-      <StudentNav />
+    <div>
 
       <header className="border-b border-brand-100 bg-brand-50">
         <div className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-8 lg:grid-cols-12 lg:items-center">
-          <div className="page-enter lg:col-span-6">
+          <div className="lg:col-span-6">
             <h1 className="font-serif text-4xl font-semibold leading-tight text-ink text-balance sm:text-5xl">
               Ambil jeda sebentar. Kamu tidak sendirian.
             </h1>

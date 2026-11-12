@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { currentUser, loadProfile } from "@/lib/session";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 import DailyEntryForm from "./DailyEntryForm";
-import { Loading, StudentNav } from "@/components/StudentShell";
+import { Loading } from "@/components/StudentShell";
 
 const today = () => new Date().toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long" });
 function greeting(hour = new Date().getHours()) {
@@ -75,8 +75,7 @@ export default function DashboardPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-surface text-ink">
-      <StudentNav />
+    <div className="text-ink">
 
       <main className="max-w-2xl mx-auto px-4 sm:px-8 pt-8 pb-24 sm:pb-12 space-y-6">
         <div>

@@ -107,3 +107,34 @@ export function streak(entries: DayEntry[], now = new Date()) {
   }
   return n;
 }
+
+const WEEKDAY_NAMES = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+/** Hari dalam seminggu dengan rata-rata mood tertinggi dalam `days` hari terakhir (butuh >= 2 hari bermood). */
+export function bestWeekday(entries: DayEntry[], now = new Date(), days = 30) {
+  const from = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1)));
+  const buckets = new Map<number, number[]>();
+  for (const e of entries)
+    if (e.mood != null && e.date >= from && e.date <= dayKey(now)) {
+      const wd = new Date(`${e.date}T00:00`).getDay();
+      buckets.set(wd, (buckets.get(wd) ?? []).concat(e.mood));
+    }
+  if (Array.from(buckets.values()).flat().length < 2) return null;
+  const [wd, moods] = Array.from(buckets.entries())
+    .map(([d, ms]) => [d, ms] as const)
+    .sort((a, b) => b[1].reduce((x, y) => x + y, 0) / b[1].length - a[1].reduce((x, y) => x + y, 0) / a[1].length)[0];
+  return { name: WEEKDAY_NAMES[wd], average: moods.reduce((a, b) => a + b, 0) / moods.length };
+}
+
+/** Selisih rata-rata mood 7 hari terakhir dibanding 7 hari sebelumnya; null bila salah satu minggu kosong. */
+export function weekDelta(entries: DayEntry[], now = new Date()) {
+  const avg = (fromOffset: number, toOffset: number) => {
+    const lo = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - fromOffset));
+    const hi = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() - toOffset));
+    const ms = entries.filter((e) => e.mood != null && e.date >= lo && e.date <= hi).map((e) => e.mood as number);
+    return ms.length ? ms.reduce((a, b) => a + b, 0) / ms.length : null;
+  };
+  const current = avg(6, 0);
+  const previous = avg(13, 7);
+  return current == null || previous == null ? null : current - previous;
+}

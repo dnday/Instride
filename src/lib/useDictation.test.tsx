@@ -2,7 +2,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import DailyEntryForm from "@/app/dashboard/DailyEntryForm";
+import DailyEntryForm from "@/app/(mahasiswa)/dashboard/DailyEntryForm";
 import { appendDictation } from "./useDictation";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), push: vi.fn() }) }));

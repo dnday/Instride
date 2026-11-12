@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, m } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 
@@ -10,6 +11,7 @@ import { getSupabaseClient } from "@/lib/supabaseClient";
 import { hasCrisisLanguage } from "@/lib/crisis";
 import { CrisisNotice } from "@/components/CrisisNotice";
 import { MoodFace } from "@/components/MoodFace";
+import { springSoft } from "@/components/Motion";
 import { MOOD_COLORS, MOOD_LABELS } from "@/lib/mood";
 import { appendDictation, useDictation } from "@/lib/useDictation";
 
@@ -97,8 +99,16 @@ export default function DailyEntryForm({
       <h2 className="font-serif text-xl font-semibold text-ink">Bagaimana harimu?</h2>
       <p className="mt-1 text-sm text-muted">Pilih mood, lalu tulis jurnal bila ingin (opsional). Tidak ada jawaban yang salah.</p>
 
+      <AnimatePresence initial={false}>
       {savedNow && (
-        <p className="pop-in mt-3 flex items-center gap-3 rounded-xl bg-brand-50 p-3 text-sm font-medium text-brand-900" role="status">
+        <m.p
+          key="tersimpan"
+          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, transition: { duration: 0.15 } }}
+          className="mt-3 flex items-center gap-3 rounded-xl bg-brand-50 p-3 text-sm font-medium text-brand-900"
+          role="status"
+        >
           <svg viewBox="0 0 24 24" aria-hidden="true" className="h-7 w-7 shrink-0">
             <circle cx="12" cy="12" r="11" fill="#2A7470" />
             <path className="check-draw" d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -107,8 +117,9 @@ export default function DailyEntryForm({
             <span className="block">Catatan harian tersimpan.</span>
             <span className="block font-normal">Terima kasih sudah meluangkan waktu untuk dirimu.</span>
           </span>
-        </p>
+        </m.p>
       )}
+      </AnimatePresence>
       {needsHelp && <CrisisNotice />}
       {!savedNow && alreadyToday && (
         <p className="mt-3 rounded-xl bg-brand-50 p-3 text-sm text-brand-900" role="status">
@@ -137,7 +148,7 @@ export default function DailyEntryForm({
               const active = mood === v;
               const color = MOOD_COLORS[v];
               return (
-                <button
+                <m.button
                   type="button"
                   key={v}
                   role="radio"
@@ -145,14 +156,27 @@ export default function DailyEntryForm({
                   aria-label={`Mood ${v} - ${MOOD_LABELS[v]}`}
                   title={MOOD_LABELS[v]}
                   onClick={() => setMood(v)}
-                  style={active ? { borderColor: color.fill, background: color.tint } : undefined}
-                  className={`mood-option flex min-h-11 flex-col items-center gap-1.5 rounded-2xl border-2 px-1 py-3 ${
-                    active ? "text-ink" : "border-transparent text-muted hover:bg-surface"
+                  whileTap={{ scale: 0.94 }}
+                  className={`relative isolate flex min-h-11 flex-col items-center gap-1.5 rounded-2xl px-1 py-3 transition-colors duration-150 ${
+                    active ? "text-ink" : "text-muted hover:bg-surface"
                   }`}
                 >
-                  <MoodFace value={v} active={active} className="h-10 w-10 sm:h-12 sm:w-12" />
+                  {/* Sorotan berpindah antar-wajah (shared layout) dan berganti warna sesuai mood */}
+                  {active && (
+                    <m.span
+                      layoutId="mood-highlight"
+                      aria-hidden="true"
+                      className="absolute inset-0 -z-10 rounded-2xl border-2"
+                      initial={false}
+                      animate={{ backgroundColor: color.tint, borderColor: color.fill }}
+                      transition={springSoft}
+                    />
+                  )}
+                  <m.span animate={{ scale: active ? 1.12 : 1, y: active ? -2 : 0 }} transition={springSoft}>
+                    <MoodFace value={v} active={active} className="h-10 w-10 sm:h-12 sm:w-12" />
+                  </m.span>
                   <span className={`text-center text-xs leading-tight ${active ? "font-semibold" : "font-medium"}`}>{MOOD_LABELS[v]}</span>
-                </button>
+                </m.button>
               );
             })}
           </div>
