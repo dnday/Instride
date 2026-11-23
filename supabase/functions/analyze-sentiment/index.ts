@@ -11,7 +11,10 @@ import {
   lexiconSentiment,
   parseGradioSse,
   pickTopLabel,
+  selectPending,
   type Sentiment,
+  type Source,
+  withRetry,
 } from "../_shared/sentiment.ts";
 
 const CORS = {
@@ -72,18 +75,28 @@ function loadInset(): Promise<Lexicon | null> {
   return inset;
 }
 
-/** null = model maupun leksikon tidak tersedia; jurnal dibiarkan tanpa label dan dicoba lagi nanti. */
-async function classify(text: string): Promise<{ sentiment: Sentiment; source: "indobert" | "inset" } | null> {
-  if (remote) {
-    try {
-      // Timeout 25 detik: Space gratis bisa "bangun tidur" dulu saat lama tidak dipakai
-      const label = pickTopLabel(await remote(text, AbortSignal.timeout(25000)));
-      const sentiment = label ? labelToSentiment(label) : null;
-      if (sentiment) return { sentiment, source: "indobert" };
-    } catch {
-      // jatuh ke leksikon InSet
-    }
-  }
+// Space gratis bisa "bangun tidur" dulu: beri beberapa kesempatan sebelum jatuh ke leksikon (Issue #51).
+const ATTEMPT_TIMEOUT_MS = 20000;
+const RETRY_DELAY_MS = 2000;
+
+/** Coba model sendiri. `attempts` > 1 memberi waktu Space bangun; null = model tidak menjawab. */
+async function viaModel(text: string, attempts: number): Promise<Sentiment | null> {
+  if (!remote) return null;
+  return withRetry(
+    async () => {
+      const label = pickTopLabel(await remote(text, AbortSignal.timeout(ATTEMPT_TIMEOUT_MS)));
+      return label ? labelToSentiment(label) : null;
+    },
+    attempts,
+    RETRY_DELAY_MS,
+  );
+}
+
+/** Jurnal baru: IndoBERT (dengan retry), bila tetap gagal leksikon InSet yang ditandai sementara ('inset').
+ *  null = model maupun leksikon tidak tersedia; jurnal dibiarkan tanpa label dan dicoba lagi nanti. */
+async function classify(text: string): Promise<{ sentiment: Sentiment; source: Source } | null> {
+  const sentiment = await viaModel(text, 3);
+  if (sentiment) return { sentiment, source: "indobert" };
   const lex = await loadInset();
   return lex ? { sentiment: lexiconSentiment(text, lex), source: "inset" } : null;
 }
@@ -101,27 +114,41 @@ Deno.serve(async (req) => {
   // RLS membatasi ke jurnal milik user sendiri
   const { data: journals, error } = await asUser
     .from("journals")
-    .select("journal_id, content, sentiment_analysis(sentiment_id)")
+    .select("journal_id, content, sentiment_analysis(sentiment_id, source)")
     .order("created_at", { ascending: false })
     .limit(200);
   if (error) return json({ error: error.message }, 500);
 
   // ponytail: maks 20 jurnal per panggilan, sisanya terproses di kunjungan berikutnya
-  const pending = (journals ?? []).filter((j) => ![j.sentiment_analysis].flat().filter(Boolean).length).slice(0, 20);
-  const classified = await Promise.all(pending.map(async (j) => ({ journal_id: j.journal_id, result: await classify(j.content) })));
-  const results = classified.flatMap(({ journal_id, result }) => (result ? [{ journal_id, ...result }] : []));
+  const { fresh, redo } = selectPending(journals ?? [], remote !== null);
+  const classified = await Promise.all(fresh.map(async (j) => ({ journal_id: j.journal_id, result: await classify(j.content) })));
+  // Analisis ulang label sementara: sesudah jurnal baru, supaya Space sudah bangun; hanya hasil IndoBERT yang menimpa
+  const reclassified = await Promise.all(
+    redo.map(async (j) => {
+      const sentiment = await viaModel(j.content, 1);
+      return { journal_id: j.journal_id, result: sentiment ? { sentiment, source: "indobert" as Source } : null };
+    }),
+  );
+  const toRows = (items: typeof classified) =>
+    items.flatMap(({ journal_id, result }) => (result ? [{ journal_id, sentiment: result.sentiment, source: result.source }] : []));
+  const freshRows = toRows(classified);
+  const redoRows = toRows(reclassified);
 
-  if (results.length) {
+  if (freshRows.length || redoRows.length) {
     // Tabel sentiment_analysis sengaja tanpa policy tulis untuk user; hanya service role yang menulis
     const admin = createClient(url, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const { error: insErr } = await admin
-      .from("sentiment_analysis")
-      .upsert(results.map(({ journal_id, sentiment }) => ({ journal_id, sentiment })), {
-        onConflict: "journal_id",
-        ignoreDuplicates: true,
-      });
-    if (insErr) return json({ error: insErr.message }, 500);
+    // Jurnal baru tidak menimpa baris yang sudah ada (mis. panggilan paralel dari tab lain)
+    if (freshRows.length) {
+      const { error: e } = await admin.from("sentiment_analysis").upsert(freshRows, { onConflict: "journal_id", ignoreDuplicates: true });
+      if (e) return json({ error: e.message }, 500);
+    }
+    // Analisis ulang: label 'inset' ditimpa hasil IndoBERT; analyzed_at tidak diubah
+    if (redoRows.length) {
+      const { error: e } = await admin.from("sentiment_analysis").upsert(redoRows, { onConflict: "journal_id" });
+      if (e) return json({ error: e.message }, 500);
+    }
   }
 
-  return json({ analyzed: results.length, pending: pending.length - results.length, sources: results.map((r) => r.source) });
+  const analyzed = freshRows.length + redoRows.length;
+  return json({ analyzed, pending: fresh.length + redo.length - analyzed, sources: [...freshRows, ...redoRows].map((r) => r.source) });
 });

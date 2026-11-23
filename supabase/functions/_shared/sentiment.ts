@@ -75,6 +75,46 @@ export function lexiconSentiment(text: string, lex: Lexicon): Sentiment {
   return s > 0 ? "Positif" : s < 0 ? "Negatif" : "Netral";
 }
 
+export type Source = "indobert" | "inset";
+
+type JournalRow = { journal_id: number; content: string; sentiment_analysis?: unknown };
+
+/** Asal label jurnal: null bila belum dianalisis. Hasil join bisa berupa objek atau array. */
+export function analysisSource(sa: unknown): Source | null {
+  const row = [sa].flat().find(Boolean) as { source?: string } | undefined;
+  return row ? (row.source === "inset" ? "inset" : "indobert") : null;
+}
+
+/** Pilih jurnal yang perlu dianalisis, maksimal `limit` per panggilan.
+ *  fresh = belum berlabel; redo = berlabel leksikon (sementara) dan perlu dianalisis ulang dengan IndoBERT
+ *  (hanya bila model tersedia: `canReanalyze`). Jurnal baru didahulukan. */
+export function selectPending<T extends JournalRow>(journals: T[], canReanalyze: boolean, limit = 20) {
+  const fresh = journals.filter((j) => analysisSource(j.sentiment_analysis) === null).slice(0, limit);
+  const redo = canReanalyze
+    ? journals.filter((j) => analysisSource(j.sentiment_analysis) === "inset").slice(0, limit - fresh.length)
+    : [];
+  return { fresh, redo };
+}
+
+/** Jalankan `fn` sampai berhasil (hasil bukan null, tidak melempar) maksimal `attempts` kali, jeda `delayMs` antar percobaan.
+ *  Dipakai agar Space yang sedang "bangun tidur" sempat aktif sebelum jatuh ke leksikon. */
+export async function withRetry<T>(
+  fn: (attempt: number) => Promise<T | null>,
+  attempts: number,
+  delayMs: number,
+): Promise<T | null> {
+  for (let i = 0; i < attempts; i++) {
+    try {
+      const result = await fn(i);
+      if (result !== null) return result;
+    } catch {
+      // dianggap gagal; coba lagi
+    }
+    if (i < attempts - 1) await new Promise((r) => setTimeout(r, delayMs));
+  }
+  return null;
+}
+
 /** Ubah label keluaran model Hugging Face ke kategori Instride; null jika tidak dikenali. */
 export function labelToSentiment(label: string): Sentiment | null {
   const l = label.toLowerCase();
