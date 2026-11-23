@@ -1,4 +1,5 @@
 import { BreathingExercise, GroundingExercise } from "@/components/CalmTools";
+import { WarmGlow } from "@/components/WarmGlow";
 
 const ICON = {
   phone: "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z",
@@ -41,7 +42,8 @@ const TIPS = [
 // Halaman publik: tidak bergantung pada login maupun hasil analisis sentimen (FR 9)
 export default function BantuanPage() {
   return (
-    <div>
+    <div className="relative isolate overflow-hidden">
+      <WarmGlow leftTop="30%" rightTop="70%" />
 
       <header className="border-b border-brand-100 bg-brand-50">
         <div className="mx-auto grid max-w-5xl gap-8 px-4 py-10 sm:px-8 lg:grid-cols-12 lg:items-center">
@@ -55,7 +57,7 @@ export default function BantuanPage() {
           </div>
 
           <section aria-labelledby="darurat" className="lg:col-span-6">
-            <div className="rounded-3xl bg-white p-5 shadow-[0_1px_2px_rgba(31,78,75,0.06),0_12px_32px_-16px_rgba(31,78,75,0.28)] sm:p-6">
+            <div className="rounded-2xl border border-brand-100 bg-white p-6">
               <h2 id="darurat" className="font-serif text-xl font-semibold text-ink">Butuh bantuan sekarang?</h2>
               <p className="mt-1 text-sm text-ink">Gratis, rahasia, dan bisa dihubungi 24 jam.</p>
               <ul className="mt-4 divide-y divide-brand-100">
@@ -88,7 +90,7 @@ export default function BantuanPage() {
       </header>
 
       <main className="mx-auto max-w-5xl space-y-12 px-4 pb-24 pt-10 sm:px-8 sm:pb-16">
-        <div className="grid items-start gap-6 lg:grid-cols-2">
+        <div className="grid items-stretch gap-6 lg:grid-cols-2">
           <BreathingExercise />
           <GroundingExercise />
         </div>
