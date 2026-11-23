@@ -5,19 +5,26 @@ import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 
 import { ErrorNote, Loading, type Session, StudentPage, useStudent } from "@/components/StudentShell";
+import { WarmGlow } from "@/components/WarmGlow";
 import { MESSAGES, NAME_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/authValidation";
 import { clearProfileCache } from "@/lib/session";
 
 type Note = { ok: boolean; text: string } | null;
 
+// Tombol simpan nonaktif tampil abu-abu dengan teks terbaca (kontras >= 4.5:1), tidak pudar
+const SAVE_BTN = "btn disabled:bg-gray-200 disabled:text-muted disabled:opacity-100 disabled:hover:bg-gray-200";
+
 export default function ProfilPage() {
   const auth = useStudent();
   return (
-    <StudentPage title="Profil & Pengaturan" intro="Kelola data akun dan preferensimu.">
-      {auth.status === "error" && <ErrorNote message={auth.message} />}
-      {auth.status === "loading" && <Loading />}
-      {auth.status === "ready" && <Settings supabase={auth.supabase} user={auth.user} />}
-    </StudentPage>
+    <div className="relative isolate overflow-hidden">
+      <WarmGlow leftTop="30%" rightTop="70%" />
+      <StudentPage title="Profil & Pengaturan" intro="Kelola data akun dan preferensimu.">
+        {auth.status === "error" && <ErrorNote message={auth.message} />}
+        {auth.status === "loading" && <Loading />}
+        {auth.status === "ready" && <Settings supabase={auth.supabase} user={auth.user} />}
+      </StudentPage>
+    </div>
   );
 }
 
@@ -84,7 +91,7 @@ function Settings({ supabase, user }: Session) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <form onSubmit={saveName} className="card space-y-4" noValidate>
+      <form onSubmit={saveName} className="card space-y-4 self-start" noValidate>
         <div aria-hidden="true" className="grid h-16 w-16 place-items-center rounded-full bg-brand-50 font-serif text-2xl font-semibold text-brand-900">
           {(savedName || user.email || "?").charAt(0).toUpperCase()}
         </div>
@@ -99,7 +106,7 @@ function Settings({ supabase, user }: Session) {
           <p className="break-all text-sm text-ink">{user.email}</p>
         </div>
         <FormNote id="name-note" note={nameNote} />
-        <button type="submit" className="btn" disabled={busy === "name" || name.trim() === savedName}>
+        <button type="submit" className={`${SAVE_BTN} w-full`} disabled={busy === "name" || name.trim() === savedName}>
           {busy === "name" ? "Menyimpan..." : "Simpan nama"}
         </button>
       </form>
@@ -121,7 +128,7 @@ function Settings({ supabase, user }: Session) {
             </div>
           </div>
           <FormNote id="pass-note" note={passNote} />
-          <button type="submit" className="btn" disabled={busy === "pass" || !password}>
+          <button type="submit" className={SAVE_BTN} disabled={busy === "pass" || !password}>
             {busy === "pass" ? "Menyimpan..." : "Simpan password"}
           </button>
         </form>
