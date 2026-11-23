@@ -10,6 +10,7 @@ import { CardTitle, Icon, type IconName } from "@/components/Icon";
 import { MoodFace } from "@/components/MoodFace";
 import { enterEase } from "@/components/Motion";
 import { ErrorNote, Loading, loadWithBackgroundAnalysis, SentimentBadge, StudentPage, useStudent } from "@/components/StudentShell";
+import { WarmGlow } from "@/components/WarmGlow";
 import { bestWeekday, type DayEntry, mergeEntries, monthGrid, streak, trendSeries, weekDelta, weeklySummary } from "@/lib/history";
 import { MOOD_COLORS, MOOD_LABELS, moodColor } from "@/lib/mood";
 
@@ -48,6 +49,8 @@ export default function PersonalDashboard() {
   const thisMonth = month.getFullYear() === new Date().getFullYear() && month.getMonth() === new Date().getMonth();
 
   return (
+    <div className="relative isolate overflow-hidden">
+      <WarmGlow leftTop="12%" rightTop="58%" />
     <StudentPage title="Dashboard Saya" intro="Hanya kamu yang dapat melihat halaman ini.">
       {auth.status === "error" && <ErrorNote message={auth.message} />}
       {error && <ErrorNote message={error} />}
@@ -61,17 +64,12 @@ export default function PersonalDashboard() {
         </div>
       ) : (
         <>
-          {/* Kartu sorotan: latar mengikuti warna mood rata-rata, wajah melayang pelan */}
+          {/* Kartu sorotan: putih polos dengan batas tipis, wajah mood melayang pelan */}
           <m.section
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: enterEase }}
-            className="card-raised relative overflow-hidden rounded-3xl p-6 sm:p-8"
-            style={{
-              background: summary.averageMood != null
-                ? `linear-gradient(135deg, ${moodColor(summary.averageMood).tint} 0%, #ffffff 62%)`
-                : "#ffffff",
-            }}
+            className="rounded-2xl border border-brand-100 bg-white p-6 sm:p-8"
           >
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
               {summary.averageMood != null && (
@@ -104,7 +102,7 @@ export default function PersonalDashboard() {
 
           {/* Wawasan: dihitung dari datamu sendiri */}
           {(best || delta != null) && (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid divide-y divide-brand-100 rounded-2xl border border-brand-100 bg-white sm:grid-cols-2 sm:divide-x sm:divide-y-0">
               {best && (
                 <Insight icon="sun" title="Hari terbaikmu" delay={0.08}>
                   Dalam 30 hari terakhir, mood-mu paling baik di hari <strong>{best.name}</strong> (rata-rata{" "}
@@ -161,12 +159,13 @@ export default function PersonalDashboard() {
                           ? { background: moodColor(c.mood).tint, boxShadow: `inset 0 0 0 2px ${moodColor(c.mood).fill}` }
                           : {}),
                       }}
-                      className={`cell-in tnum grid aspect-square place-items-center rounded-xl text-sm font-semibold ${
+                      className={`cell-in tnum flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-semibold leading-tight ${
                         c.mood != null ? "text-ink" : c.journals ? "bg-brand-50 text-brand-900" : "bg-surface text-muted"
                       }`}
                       aria-label={`${c.day}: ${c.mood != null ? `mood ${fmtNum(c.mood)}, ${MOOD_LABELS[Math.round(c.mood)]}` : "belum mencatat"}${c.journals ? `, ${c.journals} jurnal` : ""}`}
                     >
                       {c.day}
+                      {c.mood != null && <span className="text-xs font-medium">{fmtNum(c.mood)}</span>}
                     </li>
                   ),
                 )}
@@ -175,6 +174,7 @@ export default function PersonalDashboard() {
                 {[1, 2, 3, 4, 5].map((v) => (
                   <li key={v} className="flex items-center gap-1.5">
                     <span aria-hidden="true" className="h-3 w-3 rounded" style={{ background: MOOD_COLORS[v].fill }} />
+                    <span className="tnum font-semibold">{v}</span>
                     {MOOD_LABELS[v]}
                   </li>
                 ))}
@@ -231,13 +231,14 @@ export default function PersonalDashboard() {
         </>
       )}
     </StudentPage>
+    </div>
   );
 }
 
 function Chip({ icon, tone = "plain", children }: { icon: IconName; tone?: "plain" | "warm"; children: React.ReactNode }) {
   return (
     <li className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-sm font-medium ${
-      tone === "warm" ? "bg-[#F8E6D6] text-[#8A4A1E]" : "bg-white/80 text-ink ring-1 ring-brand-100"
+      tone === "warm" ? "bg-brand-50 text-brand-900 ring-1 ring-brand-100" : "bg-white/80 text-ink ring-1 ring-brand-100"
     }`}>
       <Icon name={icon} className="h-4 w-4" />
       <span className="tnum">{children}</span>
@@ -251,7 +252,7 @@ function Insight({ icon, title, delay, children }: { icon: IconName; title: stri
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: enterEase, delay }}
-      className="card card-raised flex gap-4"
+      className="flex gap-4 p-5 sm:p-6"
     >
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
         <Icon name={icon} className="h-5 w-5" />
