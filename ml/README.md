@@ -18,6 +18,26 @@ Leksikon InSet sangat lemah di kelas netral (recall 0,07) karena hampir semua ka
 sengaja **tidak** disetel agar tidak ada angka buatan. Bila tidak ada model maupun leksikon yang bisa dihubungi,
 jurnal dibiarkan "Menunggu analisis" dan dicoba lagi nanti, bukan diberi label tebakan.
 
+## Evaluasi di luar SmSA
+
+Karena SmSA bukan jurnal, model diuji lagi pada dua data lain. Rincian ada di `results/*_jurnal.json` dan `results/*_emot.json`.
+
+| Data uji | Model | Akurasi | Macro-F1 |
+| --- | --- | --- | --- |
+| EmoT, 440 tweet (hanya positif dan negatif; pemetaan emosi ke sentimen adalah asumsi tim) | IndoBERT | 0,798 | 0,803 |
+| EmoT | Leksikon InSet | 0,668 | 0,651 |
+| Jurnal uji, 185 jurnal (netral 65, positif 60, negatif 60) | IndoBERT | 0,887 (selang 95%: 0,838 sampai 0,930) | 0,887 |
+| Jurnal uji | Leksikon InSet | 0,465 | 0,417 |
+
+Jurnal uji (`eval/jurnal_uji.csv`) disusun dengan bantuan AI dan sebagian besar berlabel tunggal; hanya 10 baris yang ditinjau tim. Angkanya batas atas, bukan klaim akurasi pada jurnal asli. Aturan data dan cara menambahnya ada di `eval/PANDUAN_LABEL.md`.
+
+Pola kesalahan IndoBERT pada jurnal uji (21 dari 185):
+- Jurnal netral yang berbunyi "biasa saja" atau "campur aduk" dibaca negatif, sering dengan keyakinan tinggi.
+- Jurnal positif yang memuat kata negatif ("rasa cemas langsung hilang", "capeknya hilang") dibaca negatif.
+- Leksikon hanya menangkap 9% jurnal netral.
+
+Menjalankan ulang: lihat bagian "Menjalankan" di `eval/PANDUAN_LABEL.md`.
+
 ## Dasar setiap angka
 
 | Angka | Nilai | Sumber |
