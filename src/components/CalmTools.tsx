@@ -69,7 +69,7 @@ export function BreathingExercise() {
           }}
         />
         <div
-          className="absolute inset-3 rounded-full bg-gradient-to-br from-[#CFE9E6] to-[#5FA67F] shadow-[0_20px_60px_-20px_rgba(42,116,112,0.7)] motion-reduce:!transition-none"
+          className="absolute inset-3 rounded-full bg-brand-500 motion-reduce:!transition-none"
           style={{ transform: `scale(${scale})`, transition: `transform ${running ? current.secs : 0.6}s var(--ease-in-out)` }}
         />
         <div className="tnum relative font-serif text-4xl font-semibold text-brand-900">
@@ -115,7 +115,7 @@ export function GroundingExercise() {
   }
 
   return (
-    <section className="card" aria-labelledby="grounding-title">
+    <section className="card flex flex-col" aria-labelledby="grounding-title">
       <h2 id="grounding-title" className="font-serif text-2xl font-semibold text-ink">Grounding 5-4-3-2-1</h2>
       <p className="mt-1 text-sm text-muted">Saat pikiran berputar, kembalikan perhatian ke panca indra.</p>
 
@@ -140,7 +140,7 @@ export function GroundingExercise() {
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0, transition: { duration: 0.3, ease: enterEase } }}
           exit={{ opacity: 0, x: -24, transition: { duration: 0.15 } }}
-          className="mt-6"
+          className="mt-6 flex flex-1 flex-col"
         >
           <div className="flex items-center gap-4">
             <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
@@ -153,7 +153,7 @@ export function GroundingExercise() {
               <p className="text-sm text-muted">{s.hint}</p>
             </div>
           </div>
-          <div className="mt-5 flex flex-wrap gap-3" role="group" aria-label={`Ketuk tiap kali menyebut satu hal (${taps} dari ${s.n})`}>
+          <div className="mt-auto flex flex-wrap gap-3 pt-5" role="group" aria-label={`Ketuk tiap kali menyebut satu hal (${taps} dari ${s.n})`}>
             {Array.from({ length: s.n }, (_, i) => (
               <button
                 key={i}
