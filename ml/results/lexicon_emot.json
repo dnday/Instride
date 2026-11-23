@@ -1,0 +1,31 @@
+{
+  "lexicon": "InSet (Koto & Rahmaningtyas, IALP 2017)",
+  "dataset": "EmoT test (IndoNLU), emosi dipetakan ke Positif/Negatif",
+  "n": 440,
+  "test": {
+    "Positif": {
+      "precision": 0.5906040268456376,
+      "recall": 0.5333333333333333,
+      "f1-score": 0.5605095541401275,
+      "support": 165
+    },
+    "Netral": {
+      "precision": 0,
+      "recall": 0,
+      "f1-score": 0,
+      "support": 0
+    },
+    "Negatif": {
+      "precision": 0.7357142857142858,
+      "recall": 0.7490909090909091,
+      "f1-score": 0.7423423423423425,
+      "support": 275
+    },
+    "accuracy": 0.6681818181818182,
+    "macro avg": {
+      "precision": 0.6631591562799617,
+      "recall": 0.6412121212121212,
+      "f1-score": 0.651425948241235
+    }
+  }
+}

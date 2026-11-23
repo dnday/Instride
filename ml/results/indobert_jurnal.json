@@ -1,0 +1,80 @@
+{
+  "model": "mnrsu/instride",
+  "dataset": "jurnal bergaya mahasiswa, sintetis (disusun dengan bantuan AI; 6 baris ditinjau tim), label tunggal",
+  "n": 185,
+  "support": {
+    "Positif": 60,
+    "Netral": 65,
+    "Negatif": 60
+  },
+  "cohen_kappa_antar_pelabel": null,
+  "belum_diputuskan": 4,
+  "test": {
+    "Positif": {
+      "precision": 0.9454545454545454,
+      "recall": 0.8666666666666667,
+      "f1-score": 0.9043478260869565,
+      "support": 60.0
+    },
+    "Netral": {
+      "precision": 0.9473684210526315,
+      "recall": 0.8307692307692308,
+      "f1-score": 0.8852459016393442,
+      "support": 65.0
+    },
+    "Negatif": {
+      "precision": 0.7945205479452054,
+      "recall": 0.9666666666666667,
+      "f1-score": 0.8721804511278195,
+      "support": 60.0
+    },
+    "accuracy": 0.8864864864864865,
+    "macro avg": {
+      "precision": 0.8958,
+      "recall": 0.888,
+      "f1-score": 0.8873,
+      "support": 185,
+      "catatan": "hanya kelas yang punya data: Positif, Netral, Negatif"
+    },
+    "weighted avg": {
+      "precision": 0.8971754214724654,
+      "recall": 0.8864864864864865,
+      "f1-score": 0.8872036769699673,
+      "support": 185.0
+    }
+  },
+  "confusion_matrix": {
+    "baris": "label benar",
+    "kolom": "prediksi",
+    "urutan": [
+      "Positif",
+      "Netral",
+      "Negatif"
+    ],
+    "nilai": [
+      [
+        52,
+        2,
+        6
+      ],
+      [
+        2,
+        54,
+        9
+      ],
+      [
+        1,
+        1,
+        58
+      ]
+    ]
+  },
+  "accuracy_95ci": [
+    0.8378,
+    0.9297
+  ],
+  "macro_f1_95ci": [
+    0.8379,
+    0.9306
+  ]
+}

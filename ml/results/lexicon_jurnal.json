@@ -1,0 +1,31 @@
+{
+  "lexicon": "InSet (Koto & Rahmaningtyas, IALP 2017)",
+  "dataset": "jurnal bergaya mahasiswa, sintetis (disusun dengan bantuan AI; 6 baris ditinjau tim), label tunggal",
+  "n": 185,
+  "test": {
+    "Positif": {
+      "precision": 0.625,
+      "recall": 0.5,
+      "f1-score": 0.5555555555555556,
+      "support": 60
+    },
+    "Netral": {
+      "precision": 0.5,
+      "recall": 0.09230769230769231,
+      "f1-score": 0.15584415584415584,
+      "support": 65
+    },
+    "Negatif": {
+      "precision": 0.4,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.5405405405405406,
+      "support": 60
+    },
+    "accuracy": 0.4648648648648649,
+    "macro avg": {
+      "precision": 0.5083333333333333,
+      "recall": 0.47521367521367525,
+      "f1-score": 0.41731341731341737
+    }
+  }
+}
