@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { StudentPage } from "@/components/StudentShell";
+import { WarmGlow } from "@/components/WarmGlow";
 
 const SECTIONS: { title: string; body: React.ReactNode }[] = [
   {
@@ -84,8 +85,10 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
 // Halaman publik: ditautkan dari formulir pendaftaran sebelum akun dibuat
 export default function PrivasiPage() {
   return (
+    <div className="relative isolate overflow-hidden">
+      <WarmGlow leftTop="8%" rightTop="55%" />
     <StudentPage title="Kebijakan Privasi" intro="Bagaimana Instride memproses data mood dan jurnalmu.">
-      <div className="card space-y-6 text-ink leading-relaxed">
+      <div className="card max-w-2xl space-y-6 text-ink leading-relaxed">
         {SECTIONS.map((s) => (
           <section key={s.title}>
             <h2 className="text-lg font-semibold">{s.title}</h2>
@@ -94,5 +97,6 @@ export default function PrivasiPage() {
         ))}
       </div>
     </StudentPage>
+    </div>
   );
 }
