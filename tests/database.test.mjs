@@ -110,3 +110,15 @@ test("agregasi terjadwal mengisi wellbeing_aggregation dan hanya bisa dijalankan
   assert.equal(rows[0].active_students, 10);
   assert.equal((await as("authenticated", id(1), "SELECT * FROM wellbeing_aggregation")).length, 0, "mahasiswa tidak boleh baca agregat");
 });
+
+test("sentiment_analysis.source: default indobert, hanya indobert/inset, label inset bisa ditimpa (Issue #51)", async () => {
+  await db.exec(`INSERT INTO journals (user_id, content) VALUES ('${id(1)}', 'uji source')`);
+  const [{ journal_id }] = (await db.query("SELECT currval('journals_journal_id_seq') AS journal_id")).rows;
+  await db.exec(`INSERT INTO sentiment_analysis (journal_id, sentiment, source) VALUES (${journal_id}, 'Positif', 'inset')`);
+  await assert.rejects(db.exec(`INSERT INTO sentiment_analysis (journal_id, sentiment, source) VALUES (${journal_id + 1000}, 'Positif', 'tebakan')`));
+  await db.exec(`INSERT INTO sentiment_analysis (journal_id, sentiment, source) VALUES (${journal_id}, 'Negatif', 'indobert')
+    ON CONFLICT (journal_id) DO UPDATE SET sentiment = EXCLUDED.sentiment, source = EXCLUDED.source`);
+  const [row] = (await db.query(`SELECT sentiment, source FROM sentiment_analysis WHERE journal_id = ${journal_id}`)).rows;
+  assert.deepEqual(row, { sentiment: "Negatif", source: "indobert" });
+  await db.exec(`DELETE FROM sentiment_analysis WHERE journal_id = ${journal_id}; DELETE FROM journals WHERE journal_id = ${journal_id}`);
+});
