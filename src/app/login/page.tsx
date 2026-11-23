@@ -8,6 +8,7 @@ import { mapSignInError } from "@/lib/authErrors";
 import { type FieldErrors, validateLogin } from "@/lib/authValidation";
 import { destinationForRole } from "@/lib/constants";
 import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { WarmGlow } from "@/components/WarmGlow";
 import { getSupabaseClient, SupabaseConfigError } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
@@ -77,8 +78,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col items-center justify-center px-4 py-10">
-      <Link href="/" className="mb-6 inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
+    <div className="relative isolate min-h-screen overflow-hidden bg-surface flex flex-col items-center justify-center px-4 py-10">
+      <WarmGlow leftTop="25%" rightTop="65%" />
+      <Link href="/"className="mb-6 inline-flex min-h-11 items-center font-serif text-2xl font-semibold text-brand-900">Instride</Link>
       <div className="w-full max-w-md card sm:p-8">
         <h1 className="font-serif text-3xl font-semibold text-center text-ink mb-6">
           Masuk ke Instride
